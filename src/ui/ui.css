@@ -568,13 +568,20 @@
   max-width: none;
 }
 
-/* Five places: three on top, two below. */
+/* Always two rows: three across, or four once the secret level opens (--cols is set on the row). */
 .levels .level-row {
   flex-wrap: wrap;
 }
 .levels .level-card {
-  flex: 0 0 calc((100% - 2 * clamp(10px, 2.2vw, 24px)) / 3);
+  flex: 0 0 calc((100% - (var(--cols, 3) - 1) * clamp(10px, 2.2vw, 24px)) / var(--cols, 3));
   max-height: 30vh;
+}
+/* The secret level: a gold edge, so it looks special. */
+.levels .level-card.secret {
+  border-color: var(--sun) !important;
+  box-shadow:
+    0 0 0 var(--stroke) var(--ink),
+    0 7px 0 rgb(40 20 5 / 0.9);
 }
 
 .menu .btn {
@@ -1062,7 +1069,7 @@
     margin-top: 2px;
   }
 
-  /* Level cards: three on top, two below, all fitting on screen. */
+  /* Level cards: two rows, all fitting on screen. */
   .levels .level-card {
     aspect-ratio: auto;
     height: min(30vh, 140px);

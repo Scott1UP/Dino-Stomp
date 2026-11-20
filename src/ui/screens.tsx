@@ -152,7 +152,7 @@ export function LevelSelect() {
       <div className="panel levels">
         <Back onPress={actions.back} />
         <h1 className="heading small">{mode === 'sandbox' ? 'Sandbox' : 'Where to?'}</h1>
-        <div className="level-row">
+        <div className="level-row" style={{ '--cols': opened ? 4 : 3 } as CSSProperties}>
           {LEVELS.map((level, index) => {
             if (level.secret && !opened) return null;
             const locked = !level.secret && mode === 'story' && index >= unlocked;
@@ -162,7 +162,7 @@ export function LevelSelect() {
                 line={level.id}
                 locked={locked}
                 main={level.id === next}
-                className="level-card"
+                className={level.secret ? 'level-card secret' : 'level-card'}
                 style={{ backgroundImage: `url(${level.card})`, animationDelay: `${index * 70}ms` }}
                 onPress={() => actions.chooseLevel(level.id)}
               >
