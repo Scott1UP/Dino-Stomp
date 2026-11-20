@@ -259,37 +259,28 @@
   stroke-width: 2.6;
 }
 
-/* The floating thumbstick appears wherever a thumb lands in the bottom-left. */
+/* The thumbstick: fixed in the bottom-left corner. The touch area is a little larger than the
+   stick itself, for small fingers, but no more, so the rest of the screen stays free for tapping. */
 .stick-zone {
   position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 44%;
-  height: 62%;
+  left: calc(14px + env(safe-area-inset-left));
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  width: 192px;
+  height: 192px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
 }
 
-/* Its home is the bottom-left corner, always on show. */
 .stick-base {
-  position: absolute;
-  left: calc(34px + env(safe-area-inset-left));
-  bottom: calc(34px + env(safe-area-inset-bottom));
+  position: relative;
   width: 152px;
   height: 152px;
   border: calc(var(--stroke) * 1.2) solid var(--ink);
   border-radius: 50%;
   background: rgb(255 247 227 / 0.45);
   box-shadow: inset 0 6px 0 rgb(40 20 5 / 0.12);
-  opacity: 0.85;
-  transition:
-    transform 0.22s var(--pop),
-    opacity 120ms ease-out;
   pointer-events: none;
-}
-
-/* While a thumb is on it, it follows the thumb at once, and looks solid. */
-.stick-base.held {
-  opacity: 1;
-  transition: opacity 120ms ease-out;
 }
 
 .stick-knob {
@@ -305,10 +296,10 @@
   box-shadow:
     inset 0 -8px 0 #e2c489,
     0 5px 0 rgb(40 20 5 / 0.9);
-  transition: transform 0.22s var(--pop);
+  transition: transform 0.18s var(--pop);
 }
 
-.stick-base.held .stick-knob {
+.stick-zone:active .stick-knob {
   transition: none;
 }
 
@@ -792,7 +783,20 @@
 
 /* ───────── settings ───────── */
 .settings {
-  width: min(620px, 100%);
+  width: min(780px, 100%);
+}
+
+/* Two buttons a row, each filling half the width, so changing one never moves the others. */
+.settings .row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+}
+.settings .row .btn {
+  width: 100%;
+  min-width: 0;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 .setting {
@@ -1095,11 +1099,15 @@
     --size: 58px;
     top: calc(12px + env(safe-area-inset-top));
   }
+  .stick-zone {
+    left: calc(8px + env(safe-area-inset-left));
+    bottom: calc(6px + env(safe-area-inset-bottom));
+    width: 150px;
+    height: 150px;
+  }
   .stick-base {
     width: 120px;
     height: 120px;
-    left: calc(24px + env(safe-area-inset-left));
-    bottom: calc(18px + env(safe-area-inset-bottom));
   }
   .stick-knob {
     width: 60px;
