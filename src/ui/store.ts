@@ -47,6 +47,8 @@ interface State {
   stickers: Record<string, boolean>;
   /** Golden dinos found, by level. */
   secrets: Partial<Record<LevelId, boolean>>;
+  /** Whether he has picked up the golden dino on this visit to the level (for the badge). */
+  foundHere: boolean;
   /** The sticker just earned, shown big for a moment. */
   toast: string | null;
 }
@@ -83,6 +85,7 @@ let state: State = {
   settings: { volume: 0.8, music: true, shake: true, graphics: 'high', fps: false, ...saved.settings },
   stickers: saved.stickers ?? {},
   secrets: saved.secrets ?? {},
+  foundHere: false,
   toast: null,
 };
 
@@ -145,6 +148,7 @@ export const actions = {
       patch.session = state.session + 1;
       patch.progress = { ...state.progress, [level]: [0, 0] };
       patch.celebrated = false;
+      patch.foundHere = false;
     }
     // Straight into the level: the progress display at the top shows what to smash.
     set({ ...patch, screen: 'playing' });
@@ -215,7 +219,7 @@ export const actions = {
     }, 3200);
   },
   findSecret(level: LevelId) {
-    if (!state.secrets[level]) set({ secrets: { ...state.secrets, [level]: true } });
+    set({ secrets: { ...state.secrets, [level]: true }, foundHere: true });
     actions.award('secret');
   },
   openStickers() {

@@ -227,7 +227,7 @@ export function Hud({ playing }: { playing: boolean }) {
   const story = useStore((s) => s.mode === 'story');
   const level = useStore((s) => s.level);
   const session = useStore((s) => s.session);
-  const foundSecret = useStore((s) => !!s.secrets[s.level]);
+  const foundSecret = useStore((s) => s.foundHere);
   const finished = useStore((s) => s.celebrated);
 
   // A voice says what to smash as the level begins; there is no intro to sit through.
