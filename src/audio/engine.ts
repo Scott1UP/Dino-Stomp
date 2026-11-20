@@ -177,14 +177,6 @@ function synthesise() {
     const lp = lowpass(0.3);
     return render(0.9, (t, n) => (t < 0.25 ? sine(600 + t * 3000, t) * 0.3 : (n() - lp(n())) * decay(t - 0.25, 5)));
   });
-  variants('snare', () => {
-    const lp = lowpass(0.5);
-    return render(0.12, (t, n) => (n() - lp(n()) * 0.5) * decay(t, 32) + sine(190, t) * decay(t, 40) * 0.5);
-  });
-  variants('hat', () => {
-    const lp = lowpass(0.6);
-    return render(0.04, (t, n) => (n() - lp(n())) * decay(t, 90));
-  });
 }
 
 // --- playing -------------------------------------------------------------------
@@ -408,38 +400,7 @@ export const audio = {
 
 // --- music -------------------------------------------------------------------------
 
-/**
- * A toy marching band at 120 BPM, played live by a small sequencer. Two layers:
- * a base groove (bass, oom-pah and a xylophone tune), and a percussion layer
- * that fades up as the destruction builds and back down when things calm.
- */
-
-const STEP = 60 / 120 / 4; // a sixteenth note
-const MAJOR = [0, 2, 4, 5, 7, 9, 11];
-
-interface Theme {
-  root: number; // Hz
-  melody: (number | null)[]; // scale degrees, 32 steps (two bars), null is a rest
-  bass: number[]; // scale degrees per beat, 8 beats
-}
-
-const THEMES: Theme[] = [
-  // Block Town: a bright march.
-  { root: 261.63, melody: [0, null, 2, null, 4, null, 4, 4, 5, null, 4, null, 2, null, null, null, 4, null, 5, null, 7, null, 7, 7, 9, null, 7, null, 4, null, null, null], bass: [0, 4, 0, 4, 3, 4, 0, 4] },
-  // Playground Park: bouncier, with more hops.
-  { root: 293.66, melody: [4, null, null, 4, 2, null, 0, null, 2, null, 4, null, 7, null, null, null, 5, null, null, 5, 4, null, 2, null, 0, null, 2, null, 0, null, null, null], bass: [0, 2, 4, 2, 3, 5, 4, 2] },
-  // Castle Hill: grander, a fanfare shape.
-  { root: 220.0, melody: [0, null, 0, 0, 4, null, null, null, 4, null, 4, 4, 7, null, null, null, 9, null, 7, null, 5, null, 4, null, 2, null, 4, null, 0, null, null, null], bass: [0, 0, 4, 4, 5, 5, 4, 4] },
-  // Sandbox: a looser loop.
-  { root: 246.94, melody: [0, null, 4, null, 2, null, 5, null, 4, null, null, null, 2, null, 0, null, 7, null, 4, null, 5, null, 2, null, 4, null, null, null, 0, null, null, null], bass: [0, 4, 3, 4, 0, 4, 5, 4] },
-];
-
-let musicTimer = 0;
-let musicTheme: Theme | null = null;
-let nextStepAt = 0;
-let stepIndex = 0;
-let percussion: GainNode | null = null;
-
+/** A single synthesised note (used for the fanfare until its recording loads). */
 function note(ctx: AudioContext, out: AudioNode, frequency: number, at: number, seconds: number, type: OscillatorType, level: number) {
   const oscillator = ctx.createOscillator();
   const gain = ctx.createGain();
@@ -451,54 +412,6 @@ function note(ctx: AudioContext, out: AudioNode, frequency: number, at: number, 
   oscillator.connect(gain).connect(out);
   oscillator.start(at);
   oscillator.stop(at + seconds + 0.02);
-}
-
-const degree = (root: number, d: number) => root * 2 ** ((MAJOR[((d % 7) + 7) % 7] + 12 * Math.floor(d / 7)) / 12);
-
-function hitDrum(ctx: AudioContext, name: string, at: number, level: number) {
-  const set = buffers.get(name)!;
-  const source = ctx.createBufferSource();
-  source.buffer = set[Math.floor(Math.random() * set.length)];
-  const gain = ctx.createGain();
-  gain.gain.value = level;
-  source.connect(gain).connect(percussion!);
-  source.start(at);
-}
-
-function schedule() {
-  if (!context || !musicTheme) return;
-  const ctx = context;
-  const theme = musicTheme;
-  const dt = 0.05;
-  chaos = Math.max(0, chaos - dt * 0.22);
-  // The percussion layer follows how much is being smashed right now.
-  percussion!.gain.setTargetAtTime(getState().settings.music ? chaos : 0, ctx.currentTime, 0.4);
-  const base = getState().settings.music ? 1 : 0;
-
-  while (nextStepAt < ctx.currentTime + 0.15) {
-    const step = stepIndex % 32;
-    const at = nextStepAt;
-    if (base) {
-      const melody = theme.melody[step];
-      if (melody !== null) {
-        // The "xylophone": a quick bright pluck.
-        note(ctx, channels.music, degree(theme.root * 2, melody), at, 0.22, 'triangle', 0.5);
-        note(ctx, channels.music, degree(theme.root * 4, melody), at, 0.08, 'sine', 0.2);
-      }
-      if (step % 4 === 0) note(ctx, channels.music, degree(theme.root / 2, theme.bass[step / 4]), at, 0.3, 'triangle', 0.7);
-      if (step % 4 === 2) {
-        // The "pah" of the oom-pah: a soft brass stab.
-        const d = theme.bass[(step - 2) / 4];
-        note(ctx, channels.music, degree(theme.root, d + 2), at, 0.12, 'square', 0.12);
-        note(ctx, channels.music, degree(theme.root, d + 4), at, 0.12, 'square', 0.12);
-      }
-    }
-    if (step % 8 === 4) hitDrum(ctx, 'snare', at, 0.9);
-    if (step % 2 === 0) hitDrum(ctx, 'hat', at, 0.35);
-    if (step % 32 >= 28) hitDrum(ctx, 'snare', at, 0.5); // a little roll into the next bar
-    nextStepAt += STEP;
-    stepIndex++;
-  }
 }
 
 /** The recorded pieces, one per level plus the sandbox, in theme order. */
@@ -522,8 +435,6 @@ function playTrack(name: string) {
   const ctx = ensure();
   const buffer = tracks.get(name);
   if (!buffer || trackPlaying === name) return;
-  window.clearInterval(musicTimer); // the built-in sequencer steps aside
-  musicTheme = null;
   if (!trackBus) {
     trackBus = ctx.createGain();
     trackFilter = ctx.createBiquadFilter();
@@ -592,42 +503,23 @@ function stopTrack() {
   trackPlaying = null;
 }
 
+/** Play a level's piece. If its recording is still loading, it starts the moment it arrives. */
 function startMusic(theme: number) {
-  const ctx = ensure();
+  ensure();
   trackWanted = TRACKS[theme % TRACKS.length];
   if (trackPlaying && trackPlaying !== trackWanted) stopTrack();
-  if (tracks.has(trackWanted)) {
-    playTrack(trackWanted);
-    return;
-  }
-  // No recording (yet): the built-in sequencer plays instead.
-  if (!percussion) {
-    percussion = ctx.createGain();
-    percussion.gain.value = 0;
-    percussion.connect(channels.music);
-  }
-  // Levels without a recording of their own borrow one of the built-in tunes.
-  const next = THEMES[theme === 4 ? 1 : theme === 5 ? 3 : theme === 6 ? 2 : theme % THEMES.length];
-  if (musicTheme === next) return;
-  musicTheme = next;
-  stepIndex = 0;
-  nextStepAt = ctx.currentTime + 0.1;
-  window.clearInterval(musicTimer);
-  musicTimer = window.setInterval(schedule, 50);
+  if (tracks.has(trackWanted)) playTrack(trackWanted);
 }
 
 function stopMusic() {
   trackWanted = null;
   stopTrack();
-  window.clearInterval(musicTimer);
-  musicTheme = null;
 }
 
 // While developing, saving this file swaps in a fresh copy of it. Shut this copy's sound down
 // first, or its music carries on underneath the new copy's (two songs at once).
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
-    window.clearInterval(musicTimer);
     window.clearInterval(trackTick);
     window.clearTimeout(trackLoop);
     void context?.close();
