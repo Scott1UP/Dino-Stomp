@@ -134,6 +134,11 @@ class Mat:
             tone = (1 - amount / 2) + amount * blotches(5) * (0.9 + 0.2 * rng.random((SIZE_PX, SIZE_PX)).astype(np.float32))
             self.pixels[mask] *= tone[mask][:, None]
 
+        # The lake: soft lighter and darker patches, like light on water.
+        water = self.near(["#3E7FA8"])
+        tone = 0.92 + 0.16 * blotches(10)
+        self.pixels[water] *= tone[water][:, None]
+
         # Roads: fine speckle, like printed tarmac.
         speckle = 0.95 + 0.07 * rng.random((SIZE_PX, SIZE_PX)).astype(np.float32)
         self.pixels[road] *= speckle[road][:, None]
@@ -206,6 +211,15 @@ def draw(layout, path, footprints=()):
 
     if layout.get("base") == "grass":
         mat.rect(-half + 3, -half + 3, half - 3, half - 3, GRASS, radius=10)
+    elif layout.get("base") == "lake":
+        # A lake, with islands drawn as overlapping blobs: a rocky shore, then grass on top.
+        mat.rect(-half + 3, -half + 3, half - 3, half - 3, "#3E7FA8", radius=10)
+        for x, y, r in layout.get("islands", []):
+            mat.circle(x, y, r + 4, "#B7A98F")
+        for x, y, r in layout.get("islands", []):
+            mat.circle(x, y, r + 1.5, "#9E9078")
+        for x, y, r in layout.get("islands", []):
+            mat.circle(x, y, r, GRASS)
 
     for patch in layout.get("grass", []):
         if "circle" in patch:

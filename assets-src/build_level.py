@@ -21,7 +21,7 @@ sys.path.insert(0, HERE)
 from lib import palette, scene as scene_lib  # noqa: E402
 from textures import detail, playmat  # noqa: E402
 
-LEVELS = ["block-town", "playground-park", "farm", "forest", "castle-hill"]
+LEVELS = ["block-town", "playground-park", "farm", "forest", "castle-hill", "hogwarts"]
 LEVEL_TRIANGLE_BUDGET = 80_000
 # Extra per-entry fields from the layout that the game reads.
 PASS_THROUGH = ("objective", "order", "run", "speed", "yaw", "secret")

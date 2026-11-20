@@ -138,35 +138,39 @@ def drum(kit, r0, r1, z0, z1, colour, sides=8, cx=0.0, cy=0.0, top=None, bottom=
     kit.convex(faces, colour, colours)
 
 
-def spire(kit, r, z0, z1, colour, sides=8, cx=0.0, cy=0.0, kick=0.16, under=None, r_top=0.0):
-    """A steep pointed spire with a little kick out at the eaves, like a witch's hat.
+def _spire_radius(r, z0, z1, kick, knee, z):
+    """Radius of a kicked spire (see `kicked_spire`) at height z."""
+    k_z = z0 + (z1 - z0) * kick
+    k_r = r * knee
+    if z <= k_z:
+        return r + (k_r - r) * (z - z0) / (k_z - z0) if k_z > z0 else k_r
+    return k_r * (z1 - z) / (z1 - k_z)
 
-    It runs from z0 to z1 (or stops at radius `r_top` for the lower half of a
-    spire split in two). One convex solid, so it makes one good hull.
+
+def kicked_spire(kit, r, z0, z1, colour, sides=8, cx=0.0, cy=0.0, kick=0.08, knee=0.8, cut=None, part="all"):
+    """A steep spire with a little kick at the eaves, as one convex solid with no hidden faces.
+
+    It runs from radius r at z0 to a point at z1. `cut` splits it at that
+    height: part "lower" is the piece below (flat top), "upper" the tip above.
     """
-    rise = z1 - z0
-    if kick > 0:
-        k_z = z0 + rise * kick
-        k_r = r * 0.74
-    else:
-        k_z, k_r = z0, r
-    full = z1
+    k_z = z0 + (z1 - z0) * kick
+    k_r = r * knee
+    if part == "upper":
+        c_r = _spire_radius(r, z0, z1, kick, knee, cut)
+        lower = ring(c_r, cut, sides, cx, cy)
+        faces = _ring_faces(lower, None, apex_high=(cx, cy, z1)) + [lower]
+        kit.convex(faces, colour)
+        return
     base = ring(r, z0, sides, cx, cy)
-    faces = [base]
-    colours = {0: under} if under else {}
-    if kick > 0:
-        knee = ring(k_r, k_z, sides, cx, cy)
-        faces += _ring_faces(base, knee)
+    knee_ring = ring(k_r, k_z, sides, cx, cy)
+    faces = [base] + _ring_faces(base, knee_ring)
+    if part == "lower":
+        c_r = _spire_radius(r, z0, z1, kick, knee, cut)
+        top = ring(c_r, cut, sides, cx, cy)
+        faces += _ring_faces(knee_ring, top) + [top]
     else:
-        knee = base
-    if r_top > 1e-6:
-        top = ring(r_top, full, sides, cx, cy)
-        faces += _ring_faces(knee, top)
-        faces.append(top)
-        colours[len(faces) - 1] = under or colour
-    else:
-        faces += _ring_faces(knee, None, apex_high=(cx, cy, z1))
-    kit.convex(faces, colour, colours)
+        faces += _ring_faces(knee_ring, None, apex_high=(cx, cy, z1))
+    kit.convex(faces, colour)
 
 
 def cone_part(kit, r0, r1, z0, z1, colour, sides=8, cx=0.0, cy=0.0, under=None):
@@ -337,7 +341,7 @@ __all__ = [
     "pointed_door",
     "rose_window",
     "drum",
-    "spire",
+    "kicked_spire",
     "cone_part",
     "finial",
     "pinnacle",

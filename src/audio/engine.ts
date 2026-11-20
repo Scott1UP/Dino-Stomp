@@ -502,7 +502,7 @@ function schedule() {
 }
 
 /** The recorded pieces, one per level plus the sandbox, in theme order. */
-const TRACKS = ['block-town', 'playground-park', 'castle-hill', 'sandbox', 'farm', 'forest'];
+const TRACKS = ['block-town', 'playground-park', 'castle-hill', 'sandbox', 'farm', 'forest', 'hogwarts'];
 const CROSSFADE = 1.6;
 const tracks = new Map<string, AudioBuffer>();
 let trackWanted: string | null = null;
@@ -607,7 +607,7 @@ function startMusic(theme: number) {
     percussion.connect(channels.music);
   }
   // Levels without a recording of their own borrow one of the built-in tunes.
-  const next = THEMES[theme === 4 ? 1 : theme === 5 ? 3 : theme % THEMES.length];
+  const next = THEMES[theme === 4 ? 1 : theme === 5 ? 3 : theme === 6 ? 2 : theme % THEMES.length];
   if (musicTheme === next) return;
   musicTheme = next;
   stepIndex = 0;

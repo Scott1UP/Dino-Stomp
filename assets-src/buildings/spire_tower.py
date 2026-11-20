@@ -59,7 +59,6 @@ def build(building_id, seed, scheme=None, collection=None):
     pennant = rng.choice(["tomato", "cobalt", "sunny", "bubblegum"])
     seeded_scheme = rng.choice(palette.SCHEME_NAMES)  # always drawn, so the layout's scheme never shifts the seed
     scheme = scheme or seeded_scheme
-    pal = palette.SCHEMES[scheme]
 
     building = Building(building_id, TYPE, seed, scheme, HITS_TO_COLLAPSE, collection)
     add = building.add
@@ -92,7 +91,7 @@ def build(building_id, seed, scheme=None, collection=None):
                     shapes.wall_segment(kit, i, size, size - WALL, z0, z1, "stone", "interiorCream")
                     frame = shapes.facet_frame(i, size)
                     if s == 0 and i == 0:
-                        wiz.pointed_door(kit, frame, 0, 1.3, 2.6, pal["door"])
+                        wiz.pointed_door(kit, frame, 0, 1.3, 2.6, "doorBrown")
                     elif s == 0 and i in (1, 7):
                         pass
                     elif (i + s) % 2 == 0 or flared_top:
@@ -109,7 +108,7 @@ def build(building_id, seed, scheme=None, collection=None):
                 kit = Kit()
                 castle.box_wall(kit, frame, name, size, size, z0, z1, WALL)
                 if s == 0 and name == "front":
-                    wiz.pointed_door(kit, frame, 0, 1.4, 2.7, pal["door"])
+                    wiz.pointed_door(kit, frame, 0, 1.4, 2.7, "doorBrown")
                 else:
                     pair = across >= 4.6 or flared_top
                     for u in ((-0.75, 0.75) if pair else (0.0,)):
@@ -179,15 +178,11 @@ def build(building_id, seed, scheme=None, collection=None):
     cut = 0.45
     split_z = deck_z + (tip_z - deck_z) * cut
     # The lower part: kick at the eaves, then straight up to the split.
-    kick_z = deck_z + (tip_z - deck_z) * 0.08
-    kick_r = spire_r * 0.8
-    split_r = kick_r * (tip_z - split_z) / (tip_z - kick_z)
     kit = Kit()
-    wiz.cone_part(kit, spire_r, kick_r, deck_z, kick_z, slate, sides)
-    wiz.cone_part(kit, kick_r, split_r, kick_z, split_z, slate, sides)
+    wiz.kicked_spire(kit, spire_r, deck_z, tip_z, slate, sides, cut=split_z, part="lower")
     lower = add(kit, "roof", "tile", storeys + 1, supports=(deck,), collider="hull")
     kit = Kit()
-    wiz.cone_part(kit, split_r, 0.0, split_z, tip_z, slate, sides)
+    wiz.kicked_spire(kit, spire_r, deck_z, tip_z, slate, sides, cut=split_z, part="upper")
     wiz.finial(kit, 0, 0, tip_z - 0.25, size=1.1, colour=gold)
     upper = add(kit, "roof", "tile", storeys + 2, supports=(lower,), collider="hull")
 

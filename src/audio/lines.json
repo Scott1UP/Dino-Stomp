@@ -33,7 +33,7 @@
   "stickers-open": "Your sticker book!",
   "secret-found": "You found a golden dino!",
   "robot-castle": "Robot Castle!",
-  "robot-locked": "Find all five golden dinos to open this one!",
+  "robot-locked": "Find all the golden dinos to open this one!",
   "goal-robot-castle": "Knock over the wind-up robot, and smash the castle!",
   "robot-down": "Bonk! Down goes the robot!",
   "sticker-level-block-town": "Block Town!",
@@ -69,5 +69,9 @@
   "sticker-secret": "Golden dino!",
   "hint-secret": "Find a golden dino hiding inside a building!",
   "sticker-robot": "Robot rumble!",
-  "hint-robot": "Knock over the wind-up robot!"
+  "hint-robot": "Knock over the wind-up robot!",
+  "hogwarts": "Hogwarts!",
+  "goal-hogwarts": "Knock down the tall pointy towers, and smash the castle!",
+  "sticker-level-hogwarts": "Hogwarts!",
+  "hint-level-hogwarts": "Finish Hogwarts to get this one!"
 }

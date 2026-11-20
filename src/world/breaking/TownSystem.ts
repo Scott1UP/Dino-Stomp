@@ -27,6 +27,8 @@ const FAR_PUSH_LOSS = 0.55;
  * when he walks into it, and tumbles off him instead.
  */
 const BLOCKS_BELOW = 2.5;
+/** Buildings the dino can walk through or under while they are still standing. */
+const OPEN_UNDERNEATH = new Set(['castle_gatehouse', 'gate_towers', 'viaduct']);
 /** A sudden loss of speed this big (m/s in one step) is a piece landing. */
 const IMPACT_DROP = 3;
 
@@ -627,7 +629,8 @@ export class TownSystem {
       building.rough,
     );
     // The gatehouse is two towers with an open gate between them: one box would block the gate.
-    if (building.meta.type === 'castle_gatehouse') this.refine(building);
+    // Arches and open gates: one box would fill the opening, so these get their own pieces from the start.
+    if (OPEN_UNDERNEATH.has(building.meta.type)) this.refine(building);
     if (building.kind === 'giantTower') {
       // Each base block comes away with one hit.
       building.modules.forEach((module) => (module.hp = 1));

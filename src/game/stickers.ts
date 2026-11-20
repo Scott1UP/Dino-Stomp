@@ -19,6 +19,7 @@ export const STICKERS: StickerDef[] = [
   { id: 'level-farm', art: '/ui/level-farm.webp', round: true },
   { id: 'level-forest', art: '/ui/level-forest.webp', round: true },
   { id: 'level-castle-hill', art: '/ui/level-castle-hill.webp', round: true },
+  { id: 'level-hogwarts', art: '/ui/level-hogwarts.webp', round: true },
   { id: 'level-robot-castle', art: '/ui/level-robot-castle.webp', round: true },
   { id: 'first-smash', art: '/ui/sticker-first-smash.webp' },
   { id: 'tower', art: '/ui/sticker-tower.webp' },

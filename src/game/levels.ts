@@ -1,6 +1,6 @@
 import type { DinoId } from '../types';
 
-export type LevelId = 'block-town' | 'playground-park' | 'castle-hill' | 'farm' | 'forest' | 'robot-castle';
+export type LevelId = 'block-town' | 'playground-park' | 'castle-hill' | 'farm' | 'forest' | 'hogwarts' | 'robot-castle';
 export type Mode = 'story' | 'sandbox';
 
 export interface ObjectiveDef {
@@ -90,6 +90,18 @@ export const LEVELS: LevelDef[] = [
     objectives: [
       { id: 'walls', tag: 'wall', icon: '/ui/icon-wall.webp', required: 14 },
       { id: 'giantTower', tag: 'giantTower', icon: '/ui/icon-giantTower.webp', required: 1 },
+    ],
+  },
+  {
+    id: 'hogwarts',
+    name: 'Hogwarts',
+    model: '/models/hogwarts.glb',
+    ground: '/textures/hogwarts-ground.webp',
+    card: '/ui/level-hogwarts.webp',
+    theme: 6,
+    objectives: [
+      { id: 'spires', tag: 'spire', icon: '/ui/icon-spire.webp', required: 8 },
+      { id: 'smash', tag: 'smash', icon: '/ui/icon-house.webp', required: 25 },
     ],
   },
   {
