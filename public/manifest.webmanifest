@@ -1,0 +1,9 @@
+{
+  "name": "Dino Stomp",
+  "short_name": "Dino Stomp",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#BFE3F2",
+  "theme_color": "#BFE3F2",
+  "start_url": "/"
+}
