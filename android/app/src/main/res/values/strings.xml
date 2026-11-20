@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Dino Stomp</string>
+    <string name="title_activity_main">Dino Stomp</string>
+    <string name="package_name">com.scott1up.dinostomp</string>
+    <string name="custom_url_scheme">com.scott1up.dinostomp</string>
+</resources>
