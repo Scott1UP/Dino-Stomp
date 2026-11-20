@@ -41,6 +41,7 @@ interface State {
   celebrated: boolean;
   swapping: boolean;
   parentReturn: Screen;
+  stickersReturn: Screen;
   settings: Settings;
   /** Stickers he has earned, by id. */
   stickers: Record<string, boolean>;
@@ -78,6 +79,7 @@ let state: State = {
   celebrated: false,
   swapping: false,
   parentReturn: 'title',
+  stickersReturn: 'title',
   settings: { volume: 0.8, music: true, shake: true, graphics: 'high', fps: false, ...saved.settings },
   stickers: saved.stickers ?? {},
   secrets: saved.secrets ?? {},
@@ -197,8 +199,10 @@ export const actions = {
     set({ screen: 'playing' });
   },
   nextLevel() {
+    // On through the story; the secret Robot Castle is never "next", it is chosen from the map.
     const index = LEVELS.findIndex((l) => l.id === state.level);
-    if (index + 1 < LEVELS.length) actions.chooseLevel(LEVELS[index + 1].id);
+    const next = LEVELS.slice(index + 1).find((l) => !l.secret);
+    if (next && !levelDef(state.level).secret) actions.chooseLevel(next.id);
     else set({ screen: 'levelSelect' });
   },
 
@@ -215,7 +219,10 @@ export const actions = {
     actions.award('secret');
   },
   openStickers() {
-    set({ screen: 'stickers' });
+    set({ stickersReturn: state.screen, screen: 'stickers' });
+  },
+  closeStickers() {
+    set({ screen: state.stickersReturn });
   },
 
   openParent() {

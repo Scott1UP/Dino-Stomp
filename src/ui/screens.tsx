@@ -227,6 +227,8 @@ export function Hud({ playing }: { playing: boolean }) {
   const story = useStore((s) => s.mode === 'story');
   const level = useStore((s) => s.level);
   const session = useStore((s) => s.session);
+  const foundSecret = useStore((s) => !!s.secrets[s.level]);
+  const finished = useStore((s) => s.celebrated);
 
   // A voice says what to smash as the level begins; there is no intro to sit through.
   useEffect(() => {
@@ -241,6 +243,12 @@ export function Hud({ playing }: { playing: boolean }) {
         <div className="goals">
           <Goal index={0} />
           <Goal index={1} />
+          {/* Once he has found this level's golden dino, it sits proudly next to the objectives. */}
+          {foundSecret && (
+            <div className="goal golden" aria-label="Golden dino found">
+              <img src="/ui/sticker-secret.webp" alt="" draggable={false} />
+            </div>
+          )}
         </div>
       )}
       {playing && (
@@ -248,6 +256,13 @@ export function Hud({ playing }: { playing: boolean }) {
           <Btn label="Pause" onPress={actions.pause} className="orb orb-pause">
             <PauseIcon className="solid" />
           </Btn>
+          {/* After "keep stomping", a way on to the next level whenever he is ready. */}
+          {story && finished && (
+            <Btn line="next" label="Next level" onPress={actions.nextLevel} className="btn btn-go hud-next">
+              Next
+              <ArrowRight />
+            </Btn>
+          )}
           <IdleHand />
         </>
       )}
@@ -284,6 +299,7 @@ function IdleHand() {
 
 export function Pause() {
   const sandbox = useStore((s) => s.mode === 'sandbox');
+  const finished = useStore((s) => s.mode === 'story' && s.celebrated);
   const dino = dinoDef(useStore((s) => s.dino));
   return (
     <Screen prompt="prompt-pause" className="overlay">
@@ -305,6 +321,16 @@ export function Pause() {
             Rebuild
           </Btn>
         )}
+        {finished && (
+          <Btn line="next" className="btn btn-go" onPress={actions.nextLevel}>
+            Next level
+            <ArrowRight />
+          </Btn>
+        )}
+        <Btn line="stickers-open" className="btn btn-plain" onPress={actions.openStickers}>
+          <BookOpen />
+          Stickers
+        </Btn>
         <Btn className="btn" onPress={actions.openParent}>
           <Settings />
           Settings
@@ -321,7 +347,8 @@ export function Pause() {
 export function Complete() {
   const dino = dinoDef(useStore((s) => s.dino));
   const level = useStore((s) => s.level);
-  const last = LEVELS[LEVELS.length - 1].id === level;
+  const story = LEVELS.filter((l) => !l.secret);
+  const last = story[story.length - 1].id === level || levelDef(level).secret;
   const played = useRef(false);
 
   useEffect(() => {
@@ -357,6 +384,9 @@ export function Complete() {
       </div>
       <img className="hero" src={sticker(dino.id)} alt="" draggable={false} />
       <div className="row">
+        <Btn line="stickers-open" label="Stickers" className="btn btn-alt btn-square complete-stickers" onPress={actions.openStickers}>
+          <BookOpen />
+        </Btn>
         <Btn line="go" className="btn btn-plain" onPress={actions.keepStomping}>
           <Footprints />
           Keep stomping
@@ -452,7 +482,10 @@ export function StickerBook() {
   return (
     <Screen className="overlay">
       <div className="panel book">
-        <Back onPress={actions.home} />
+        <Back onPress={actions.closeStickers} />
+        <Btn label="Home" onPress={actions.home} className="btn btn-square corner-home">
+          <Home />
+        </Btn>
         <h1 className="heading small">My stickers</h1>
         <div className="sticker-grid">
           {STICKERS.map((sticker, index) => {
