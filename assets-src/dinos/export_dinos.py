@@ -55,7 +55,7 @@ DINOS = {
         "mesh": "Stegosaurus",
         "prefix": "Stegosaurus_",
         "length": 17.0,
-        "materials": {"DarkBrown": "ankylosaurusTeal", "LightBrown": "interiorCream", "Brown": "#F7C531"},
+        "materials": {"DarkBrown": "stegosaurusTeal", "LightBrown": "interiorCream", "Brown": "#F7C531"},
     },
 }
 
@@ -116,7 +116,7 @@ def export(dino_id, spec):
     root["height"] = (hi.z - lo.z) * scale
     root["width"] = (hi.x - lo.x) * scale
 
-    # A portrait for the dino select screen, mid-idle, before the animations are rearranged.
+    # A render to redraw its sticker from (scripts/art.mjs), mid-idle, before the animations are rearranged.
     idle = bpy.data.actions.get(spec["prefix"] + "Idle")
     if idle:
         arm.animation_data.action = idle
@@ -124,7 +124,7 @@ def export(dino_id, spec):
             arm.animation_data.action_slot = idle.slots[0]
         scene.frame_set(int(idle.frame_range[0]) + 12)
     scene_lib.render_preview(
-        os.path.join(REPO, "public", "ui", f"dino-{dino_id}.webp"),
+        os.path.join(REPO, "art", "refs", f"dino-{dino_id}.webp"),
         pitch_deg=14,
         yaw_deg=-48,
         resolution=(640, 520),

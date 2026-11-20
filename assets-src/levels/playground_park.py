@@ -93,7 +93,7 @@ def layout():
         park.prop("sandpit", x, y)
 
     # --- the middle: bandstand, glasshouse, picnic lawn ---
-    bandstand = park.building("bandstand", 0, 22)
+    park.building("bandstand", 0, 22)
     park.building("glasshouse", -30, 84)
     park.building("glasshouse", 34, -101, rot=180)
     for x, y in ((-22, 40), (-14, 48), (18, 44), (26, 36), (-28, 30), (-6, -6), (10, -4)):
@@ -191,5 +191,5 @@ def layout():
     # --- the secret: a golden dino hidden inside a glasshouse ---
     next(e for e in park.data["buildings"] if e["type"] == "glasshouse")["secret"] = 1
 
-    park.data["icons"] = {"domino": [first], "ride": [ferris], "bandstand": [bandstand]}
+    park.data["icons"] = {"domino": [first], "ride": [ferris]}
     return park.data

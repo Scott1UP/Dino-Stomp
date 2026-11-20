@@ -127,11 +127,10 @@ export const SANDBOX_THEME = 3;
 
 export const levelDef = (id: LevelId) => LEVELS.find((level) => level.id === id)!;
 
-export const DINOS: { id: DinoId; name: string; colour: string; dark: string; portrait: string }[] = [
-  { id: 'trex', name: 'T. rex', colour: '#3FA34D', dark: '#2A7436', portrait: '/ui/dino-trex.webp' },
-  { id: 'triceratops', name: 'Triceratops', colour: '#7B5CC9', dark: '#553C98', portrait: '/ui/dino-triceratops.webp' },
-  { id: 'stegosaurus', name: 'Stegosaurus', colour: '#1FA2A0', dark: '#13716F', portrait: '/ui/dino-stegosaurus.webp' },
+export const DINOS: { id: DinoId; name: string; colour: string; dark: string }[] = [
+  { id: 'trex', name: 'T. rex', colour: '#3FA34D', dark: '#2A7436' },
+  { id: 'triceratops', name: 'Triceratops', colour: '#7B5CC9', dark: '#553C98' },
+  { id: 'stegosaurus', name: 'Stegosaurus', colour: '#1FA2A0', dark: '#13716F' },
 ];
 
 export const dinoDef = (id: DinoId) => DINOS.find((d) => d.id === id) ?? DINOS[0];
-export const dinoColour = (id: DinoId) => dinoDef(id).colour;

@@ -16,7 +16,7 @@
     "stone": "#9AA0A6",
     "trexGreen": "#3FA34D",
     "triceratopsPurple": "#7B5CC9",
-    "ankylosaurusTeal": "#1FA2A0",
+    "stegosaurusTeal": "#1FA2A0",
     "dust": "#FFF4DC",
     "starGold": "#FFD84D",
     "trimWhite": "#FFFDF6",
@@ -30,8 +30,7 @@
     "wood": "#D9A066",
     "hedge": "#4FB36B",
     "water": "#38B6E8",
-    "foam": "#D8F3FB",
-    "apatosaurusBlue": "#5C7FA6"
+    "foam": "#D8F3FB"
   },
   "schemes": {
     "postbox": {

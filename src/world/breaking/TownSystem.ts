@@ -28,7 +28,7 @@ const FAR_PUSH_LOSS = 0.55;
  */
 const BLOCKS_BELOW = 2.5;
 /** Buildings the dino can walk through or under while they are still standing. */
-const OPEN_UNDERNEATH = new Set(['castle_gatehouse', 'gate_towers', 'viaduct']);
+const OPEN_UNDERNEATH = new Set(['gate_towers', 'viaduct']);
 /** A sudden loss of speed this big (m/s in one step) is a piece landing. */
 const IMPACT_DROP = 3;
 

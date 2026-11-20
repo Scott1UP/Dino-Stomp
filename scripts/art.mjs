@@ -35,7 +35,7 @@ const CUTOUT =
   'sticker border all the way around the outline. No text, no letters, no background, no ground, no shadow, nothing else in the picture.';
 
 const dino = (id, what) => ({
-  size: SQUARE, transparent: true, tall: 640, from: path.join(OUT, `dino-${id}.webp`), out: `sticker-${id}`,
+  size: SQUARE, transparent: true, tall: 640, from: path.join(ROOT, 'art', 'refs', `dino-${id}.webp`), out: `sticker-${id}`,
   prompt:
     `Redraw this toy dinosaur as a sticker: ${what} Keep its exact colours, shape and pose, seen from the same angle, ` +
     `and give it a friendly face with a bright eye. ${TOY} ${ORIGINAL} ${CUTOUT} ${MARGIN}`,

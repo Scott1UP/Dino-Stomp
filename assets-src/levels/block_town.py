@@ -81,10 +81,10 @@ def layout():
 
     # --- the five landmarks, each with a star over it ---
     clock = town.building("clock_tower", 22, 19, objective="tower")
-    church = town.building("church", -92, 96, objective="tower")
+    town.building("church", -92, 96, objective="tower")
     town.building("water_tower", 96, 100, objective="tower")
     town.building("windmill", 34, 100, objective="tower")
-    flats = town.building("block_of_flats", -34, -98, rot=180, objective="tower")
+    town.building("block_of_flats", -34, -98, rot=180, objective="tower")
 
     # --- the north edge: church, school, a green with the windmill ---
     town.building("school", -30, 96)
@@ -190,5 +190,5 @@ def layout():
     hideout["secret"] = 1
 
     house = next(e["id"] for e in town.data["buildings"] if e["type"] == "terraced_house")
-    town.data["icons"] = {"tower": [clock], "house": [house], "church": [church], "flats": [flats]}
+    town.data["icons"] = {"tower": [clock], "house": [house]}
     return town.data
