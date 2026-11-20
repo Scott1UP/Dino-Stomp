@@ -1,0 +1,86 @@
+{
+  "atlas": {
+    "size": 2048,
+    "swatch": 32,
+    "padding": 8
+  },
+  "colours": {
+    "tomato": "#E8483B",
+    "sunny": "#F7C531",
+    "cobalt": "#2F6FD6",
+    "tangerine": "#F28C28",
+    "bubblegum": "#EE6FA8",
+    "ground": "#EADBB8",
+    "grass": "#A9C48E",
+    "sky": "#BFE3F2",
+    "stone": "#9AA0A6",
+    "trexGreen": "#3FA34D",
+    "triceratopsPurple": "#7B5CC9",
+    "ankylosaurusTeal": "#1FA2A0",
+    "dust": "#FFF4DC",
+    "starGold": "#FFD84D",
+    "trimWhite": "#FFFDF6",
+    "windowBlue": "#3B4F7A",
+    "windowShine": "#BFD3F2",
+    "interiorCream": "#F4E6CF",
+    "doorBrown": "#8A5A3B",
+    "leaf": "#8FD14F",
+    "glassTint": "#9ED8E8",
+    "tyre": "#2B2D42",
+    "wood": "#D9A066",
+    "hedge": "#4FB36B",
+    "water": "#38B6E8",
+    "foam": "#D8F3FB",
+    "apatosaurusBlue": "#5C7FA6"
+  },
+  "schemes": {
+    "postbox": {
+      "wall": "tomato",
+      "trim": "trimWhite",
+      "roof": "cobalt",
+      "door": "sunny"
+    },
+    "custard": {
+      "wall": "sunny",
+      "trim": "trimWhite",
+      "roof": "tomato",
+      "door": "cobalt"
+    },
+    "seaside": {
+      "wall": "cobalt",
+      "trim": "trimWhite",
+      "roof": "tangerine",
+      "door": "sunny"
+    },
+    "marmalade": {
+      "wall": "tangerine",
+      "trim": "trimWhite",
+      "roof": "cobalt",
+      "door": "doorBrown"
+    },
+    "candyfloss": {
+      "wall": "bubblegum",
+      "trim": "trimWhite",
+      "roof": "cobalt",
+      "door": "sunny"
+    },
+    "sunset": {
+      "wall": "tangerine",
+      "trim": "trimWhite",
+      "roof": "tomato",
+      "door": "cobalt"
+    },
+    "bluebell": {
+      "wall": "cobalt",
+      "trim": "trimWhite",
+      "roof": "bubblegum",
+      "door": "sunny"
+    },
+    "lemonade": {
+      "wall": "sunny",
+      "trim": "trimWhite",
+      "roof": "cobalt",
+      "door": "tomato"
+    }
+  }
+}
