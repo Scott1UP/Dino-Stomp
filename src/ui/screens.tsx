@@ -404,7 +404,6 @@ export function Complete() {
 /** For the grown-up: an ordinary settings panel. */
 export function Parent() {
   const settings = useStore((s) => s.settings);
-  const [confirming, setConfirming] = useState(false);
   return (
     <div className="overlay">
       <div className="panel settings">
@@ -446,26 +445,7 @@ export function Parent() {
           </button>
         </div>
         <div className="row">
-          {confirming ? (
-            <>
-              <button
-                className="btn btn-red"
-                onClick={() => {
-                  actions.resetProgress();
-                  setConfirming(false);
-                }}
-              >
-                Yes, reset
-              </button>
-              <button className="btn" onClick={() => setConfirming(false)}>
-                Cancel
-              </button>
-            </>
-          ) : (
-            <button className="btn" onClick={() => setConfirming(true)}>
-              Reset progress
-            </button>
-          )}
+          <HoldToReset />
           <button className="btn btn-go" onClick={actions.closeParent}>
             Done
           </button>
@@ -531,5 +511,49 @@ export function StickerToast() {
       </span>
       <span className="sticker-toast-label">New sticker!</span>
     </div>
+  );
+}
+
+/** How long the reset button has to be held, in milliseconds. */
+const RESET_HOLD = 2500;
+
+/**
+ * Reset progress only acts if it is held down for RESET_HOLD without letting go, while a red bar
+ * fills across it (as in Dino Safari and Dino Ripper). A tap, or a hold given up early, does nothing.
+ */
+function HoldToReset() {
+  const timer = useRef(0);
+  const [holding, setHolding] = useState(false);
+  const [done, setDone] = useState(false);
+  const cancel = () => {
+    window.clearTimeout(timer.current);
+    setHolding(false);
+  };
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  return (
+    <button
+      className={`btn reset ${holding ? 'holding' : ''}`}
+      style={{ '--hold': `${RESET_HOLD}ms` } as CSSProperties}
+      onPointerDown={(event) => {
+        event.currentTarget.setPointerCapture(event.pointerId);
+        setDone(false);
+        setHolding(true);
+        sounds.click();
+        timer.current = window.setTimeout(() => {
+          actions.resetProgress();
+          setHolding(false);
+          setDone(true);
+          sounds.bonk();
+        }, RESET_HOLD);
+      }}
+      onPointerUp={cancel}
+      onPointerCancel={cancel}
+      onLostPointerCapture={cancel}
+      // a long press on a tablet would otherwise bring up the browser's own menu
+      onContextMenu={(event) => event.preventDefault()}
+    >
+      <i />
+      <span>{done ? 'Progress reset' : 'Hold to reset progress'}</span>
+    </button>
   );
 }

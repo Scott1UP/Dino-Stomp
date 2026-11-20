@@ -1312,3 +1312,26 @@
     right: -12px;
   }
 }
+
+/* Reset progress: hold it down while a red bar fills across; let go early and nothing happens. */
+.btn.reset {
+  overflow: hidden;
+}
+.btn.reset i {
+  position: absolute;
+  inset: 0;
+  width: 0;
+  background: var(--red);
+  transition: width 0.2s;
+}
+.btn.reset.holding i {
+  width: 100%;
+  transition: width var(--hold) linear;
+}
+.btn.reset span {
+  position: relative;
+}
+.btn.reset.holding span {
+  color: #fff;
+  text-shadow: 0 2px 0 rgb(0 0 0 / 0.22);
+}
