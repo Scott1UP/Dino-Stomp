@@ -3,7 +3,7 @@
 import math
 import random
 
-from ._helpers import Layout
+from ._helpers import Layout, mover
 
 SIZE = 240
 EDGE = 112
@@ -123,8 +123,17 @@ def layout():
     scatter("pine_tree", 360, 5)
     scatter("tree", 30, 7)
     scatter("stump", 26, 5)
-    scatter("fern", 60, 4)
     scatter("toadstool", 30, 4)
+
+    # --- canoes paddling the river between the bridges, and a ranger's jeep on the east trail ---
+    mover(forest, "canoe", [(-104, 45), (-80, 41)], speed=3.5, yaw=90, scale=1.6, seed=1)
+    mover(forest, "canoe", [(-58, 45), (-40, 52), (-18, 46)], speed=3.5, yaw=90, scale=1.6, seed=2)
+    mover(forest, "canoe", [(8, 39), (30, 30), (40, 31)], speed=3, yaw=90, scale=1.6, seed=3)
+    mover(forest, "canoe", [(62, 37), (104, 25)], speed=3.5, yaw=90, scale=1.6, seed=4)
+    mover(forest, "car", [(0, -6), (40, -16), (84, -9)], speed=7, seed=6)
+
+    # --- the secret: a golden dino hidden in one of the log cabins ---
+    next(e for e in forest.data["buildings"] if e["type"] == "log_cabin" and e["pos"] == [-50, -70])["secret"] = 1
 
     forest.data["icons"] = {"lookout": [lookout]}
     return forest.data

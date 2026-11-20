@@ -2,7 +2,7 @@
 
 import random
 
-from ._helpers import Layout
+from ._helpers import Layout, mover
 
 SIZE = 250
 STREETS = [(-56, 10), (0, 12), (56, 10)]  # east-west streets: (y, width)
@@ -17,7 +17,6 @@ FRONTAGE = {
     "detached_house": 13,
     "block_of_flats": 15,
     "fire_station": 15,
-    "bus_shelter": 7,
 }
 HIGH_STREET = ["high_street_shop", "high_street_shop", "terraced_house", "high_street_shop", "cottage", "high_street_shop", "detached_house"]
 BACK_STREET = ["terraced_house", "cottage", "detached_house", "cottage", "high_street_shop", "cottage", "detached_house"]
@@ -100,8 +99,6 @@ def layout():
     for x, y, rot in ((-12, -92, 90), (-12, -108, 90), (12, -92, -90), (12, -108, -90)):
         town.building("market_stall", x, y, rot)
     town.building("fountain", 22, 12)
-    town.building("bus_shelter", -30, 9.2)
-    town.building("bus_shelter", 40, -9.2, rot=180)
 
     town.data["grass"] += [
         {"rect": [-EDGE, 74, -6, EDGE]},
@@ -158,9 +155,7 @@ def layout():
     for x, y in ((16, 14), (28, 14), (-8, 9.4), (-20, 9.4), (60, 9.4), (-80, -9.4), (-100, 9.4), (90, -9.4)):
         town.prop("bin", x, y)
     town.prop("post_box", 8.6, 9.2)
-    town.prop("phone_box", 36, 9.2)
     town.prop("post_box", -74, 65)
-    town.prop("phone_box", -58, -47)
     # Fruit carts under big umbrellas: in the market square, the plaza and by the green.
     for x, y in ((-6, -92), (6, -108), (16, 22), (28, 22), (-50, 9.6), (56, 78)):
         town.prop("market_umbrella", x, y)
@@ -182,6 +177,17 @@ def layout():
         town.prop("crate", x, y, rot=rng.uniform(0, 45))
     town.line("hedge", (-EDGE + 2, EDGE - 2), (EDGE - 2, EDGE - 2), 6.2)
     town.line("hedge", (-EDGE + 2, -EDGE + 2), (EDGE - 2, -EDGE + 2), 6.2)
+
+    # --- traffic: cars, a bus and an ice cream van driving the streets (down the middle of the
+    # road, clear of the parked cars). Each loop has its own roads, so they never meet head on.
+    mover(town, "car", [(-66, 0), (0, 0), (0, 56), (-66, 56)], speed=8, seed=11)
+    mover(town, "car", [(0, -56), (66, -56), (66, 0), (0, 0)], speed=8.5, seed=12)
+    mover(town, "bus", [(6, 56), (114, 56)], speed=6)
+    mover(town, "ice_cream_van", [(-114, -56), (-6, -56)], speed=6.5)
+
+    # --- the secret: a golden dino hidden inside one ordinary house ---
+    hideout = next(e for e in town.data["buildings"] if e["type"] == "cottage" and e["pos"][1] < -60)
+    hideout["secret"] = 1
 
     house = next(e["id"] for e in town.data["buildings"] if e["type"] == "terraced_house")
     town.data["icons"] = {"tower": [clock], "house": [house], "church": [church], "flats": [flats]}

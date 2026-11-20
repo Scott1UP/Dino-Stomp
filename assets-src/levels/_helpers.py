@@ -103,3 +103,15 @@ def squeeze(data, k):
         x, y, r = data["pool"]
         data["pool"] = [x * k, y * k, r]
     return data
+
+
+def mover(layout, type_name, route, speed, yaw=0, scale=1, kind_is_building=False, **extra):
+    """A vehicle that drives along a route (layout x, y points), looping back to the start.
+
+    A route of two points drives there and back. `yaw` (degrees) turns the model so its
+    front faces the way it is going: vehicles built nose-first along -Y need 0, ones built
+    along X need 90. It is knocked over like street furniture, by walking into it or a move.
+    """
+    x, y = route[0]
+    add = layout.building if kind_is_building else layout.prop
+    return add(type_name, x, y, kind="mover", route=[list(p) for p in route], speed=speed, yaw=yaw, scale=scale, **extra)

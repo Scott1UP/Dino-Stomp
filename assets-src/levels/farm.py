@@ -4,7 +4,7 @@ pumpkins and scarecrows taller than the dinosaurs."""
 import math
 import random
 
-from ._helpers import Layout
+from ._helpers import Layout, mover
 
 SIZE = 240
 EDGE = 112
@@ -102,12 +102,6 @@ def layout():
         farm.prop("trailer", x, y, rot, scale=1.4)
     for x, y in ((-34, 4), (32, 4), (-74, -40)):
         farm.prop("water_trough", x, y, scale=1.4)
-    for x, y in ((-24, -4), (-28, 8)):
-        farm.prop("milk_churns", x, y, scale=1.4)
-    for x, y in ((-36, -24), (28, -22), (12, 64)):
-        farm.prop("wheelbarrow", x, y, rot=rng.uniform(0, 180), scale=1.4)
-    for i in range(5):
-        farm.prop("beehive", -104 + i * 5, -40)
     for x, y in ((0, 6), (-60, -40), (100, 12)):
         farm.prop("toy_blocks", x, y, rot=rng.uniform(0, 90))
     for x, y in ((6, -18), (-6, 30)):
@@ -135,6 +129,14 @@ def layout():
             continue
         farm.prop("tree", x, y)
         placed += 1
+
+    # --- tractors driving up and down the lanes ---
+    mover(farm, "tractor", [(10, -32), (60, -36), (104, -30)], speed=5.5, scale=1.4, seed=2)
+    mover(farm, "tractor", [(10, 40), (60, 56), (104, 60)], speed=5, scale=1.4, seed=5)
+    mover(farm, "tractor", [(-48, 6), (-104, 4)], speed=5, scale=1.4, seed=7)
+
+    # --- the secret: a golden dino hidden in the far barn ---
+    next(e for e in farm.data["buildings"] if e["type"] == "barn" and e["pos"][0] > 40)["secret"] = 1
 
     farm.data["icons"] = {"barn": [barn], "giant": giants[:1]}
     return farm.data

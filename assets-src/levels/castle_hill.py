@@ -3,7 +3,7 @@
 import math
 import random
 
-from ._helpers import Layout
+from ._helpers import Layout, mover
 
 SIZE = 240
 EDGE = 114
@@ -135,6 +135,16 @@ def layout():
         castle.prop("crate", x + 3, y - 2, rot=rng.uniform(0, 45))
     for x, y in ((-24, -84), (24, -84), (-72, 10), (72, 10)):
         castle.prop("toy_blocks", x, y, rot=rng.uniform(0, 90))
+
+    # --- hay carts trundling round the castle and up the road to the gate ---
+    ring = OUTER + 14
+    loop = [(cx - ring, cy - ring), (cx + ring, cy - ring), (cx + ring, cy + ring), (cx - ring, cy + ring)]
+    mover(castle, "hay_cart", loop, speed=4.5, yaw=90, scale=1.4, seed=1)
+    mover(castle, "hay_cart", loop[2:] + loop[:2], speed=4.5, yaw=90, scale=1.4, seed=2)
+    mover(castle, "hay_cart", [(0, -108), (0, cy - OUTER - 10)], speed=4, yaw=90, scale=1.4, seed=3)
+
+    # --- the secret: a golden dino hidden inside the keep ---
+    next(e for e in castle.data["buildings"] if e["type"] == "castle_keep")["secret"] = 1
 
     castle.data["icons"] = {"wall": [marked[0]], "giantTower": [tower]}
     return castle.data

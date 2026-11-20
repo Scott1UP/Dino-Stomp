@@ -24,7 +24,7 @@ from textures import detail, playmat  # noqa: E402
 LEVELS = ["block-town", "playground-park", "farm", "forest", "castle-hill"]
 LEVEL_TRIANGLE_BUDGET = 80_000
 # Extra per-entry fields from the layout that the game reads.
-PASS_THROUGH = ("objective", "order", "run")
+PASS_THROUGH = ("objective", "order", "run", "speed", "yaw", "secret")
 
 
 def generator(type_name):
@@ -56,6 +56,9 @@ def build(level_id):
                 child.location = child.location * entry["scale"]
         if "kind" in entry:
             empty["kind"] = entry["kind"]
+        if "route" in entry:
+            # A custom property can only hold a flat list: x0, y0, x1, y1...
+            empty["route"] = [float(v) for point in entry["route"] for v in point]
         empty.location = (entry["pos"][0], entry["pos"][1], 0)
         empty.rotation_euler = (0, 0, math.radians(entry.get("rot", 0)))
         for key in PASS_THROUGH:

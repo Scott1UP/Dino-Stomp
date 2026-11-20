@@ -3,7 +3,7 @@
 import math
 import random
 
-from ._helpers import Layout
+from ._helpers import Layout, mover
 
 SIZE = 230
 EDGE = 108
@@ -72,12 +72,11 @@ def layout():
     park.building("helter_skelter", 50, 90, objective="ride")
     park.building("carousel", 66, 64, objective="ride")
     park.building("bouncy_castle", 94, 60, objective="ride")
-    park.building("toy_train", 60, 44, objective="ride")
     park.building("carousel", -52, -64, objective="ride")
     park.building("helter_skelter", -92, 20, objective="ride")
-    park.building("kiosk", 40, 70)
-    park.building("kiosk", 100, 78)
-    park.building("cafe", 40, 100)
+    park.building("kiosk", 46, 72)
+    park.building("kiosk", 95, 76)
+    park.building("cafe", 22, 96)
     for x, y in ((22, 84), (30, 82), (38, 84), (44, 100)):
         park.prop("cafe_table", x, y)
     for x, y in ((48, 60), (78, 72), (98, 96), (-36, 62)):
@@ -116,7 +115,6 @@ def layout():
     park.building("cottage", 100, 44, rot=-90)
     park.building("cottage", -24, -102, rot=180)
     park.building("bouncy_castle", -40, 34, objective="ride")
-    park.building("toy_train", -12, 60)
     park.building("kiosk", -44, 70)
 
     # --- four giant domino runs ---
@@ -183,6 +181,15 @@ def layout():
         park.prop("flower_planter", x, y)
     for x, y in ((44, 40), (30, 40), (-6, 14), (66, -16), (70, 72), (-66, 66)):
         park.prop("bin", x, y)
+
+    # --- the fairground train runs round the fairground, and an ice cream van drives the main path ---
+    train_loop = [(40, 54), (98, 54), (102, 58), (102, 98), (98, 102), (44, 102), (40, 98)]
+    mover(park, "toy_train", train_loop, speed=7, yaw=90, kind_is_building=True, seed=3)
+    mover(park, "toy_train", train_loop[3:] + train_loop[:3], speed=7, yaw=90, kind_is_building=True, seed=5)
+    mover(park, "ice_cream_van", [(-104, 2), (-40, 6), (-16, 12)], speed=6)
+
+    # --- the secret: a golden dino hidden inside a glasshouse ---
+    next(e for e in park.data["buildings"] if e["type"] == "glasshouse")["secret"] = 1
 
     park.data["icons"] = {"domino": [first], "ride": [ferris], "bandstand": [bandstand]}
     return park.data
