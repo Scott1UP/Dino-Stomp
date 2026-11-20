@@ -10,6 +10,9 @@ A toy-box destruction game for a young child. The full design is in `spec/dino-s
 - `npm run assets:dinos` — exports the three dino GLBs and their reference renders.
 - Any generator runs on its own to render its preview sheets into `assets-out/previews/`, e.g. `blender --background --factory-startup --python assets-src/buildings/cottage.py`.
 
+- `npm run icons` — favicon, home-screen and touch icons, the share image and the Android launcher icons (`scripts/icons.mjs`).
+- `npm run android:apk` — builds the web app and a signed release APK (`android/app/build/outputs/apk/release/app-release.apk`). Signing reads `android/keystore.properties` and `android/dino-stomp-release.jks`, both git-ignored: keep them safe, as updates to an installed app must be signed with the same key.
+
 Blender is not on PATH. The scripts default to `/Applications/Blender.app/Contents/MacOS/Blender`; set `BLENDER` to override. Blender has its own Python: never `pip install bpy`.
 
 ## Asset conventions
