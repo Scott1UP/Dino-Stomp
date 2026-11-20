@@ -13,6 +13,56 @@ EDGE = 112
 BUILDINGS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "buildings")
 
 
+BOAT_CLEARANCE = 9  # metres of water between a boat's path and the rocky shore
+SHORE = 4  # the rocky band drawn round each island
+
+
+def in_water(x, y, islands):
+    if abs(x) > EDGE - 6 or abs(y) > EDGE - 6:
+        return False
+    return all(math.hypot(x - ix, y - iy) > r + SHORE + BOAT_CLEARANCE for ix, iy, r in islands)
+
+
+def lake_routes(islands, centre=(0, 10)):
+    """Routes round the island through open water, as lists of points.
+
+    Every 6 degrees round the island, take the nearest point out from the centre that is open water.
+    Where no such point exists before the edge of the map, the way round is blocked (the strip of land
+    to the shore), so the loop is split there. Each run of open water becomes one route, and every
+    step along it is checked so a boat never cuts across a headland.
+    """
+    cx, cy = centre
+    points = []
+    for step in range(60):
+        angle = math.radians(step * 6)
+        spot = None
+        for r in range(40, 112, 2):
+            x, y = cx + r * math.cos(angle), cy + r * math.sin(angle)
+            if in_water(x, y, islands):
+                spot = (round(x, 1), round(y, 1))
+                break
+        points.append(spot)
+
+    def clear_between(a, b):
+        return all(in_water(a[0] + (b[0] - a[0]) * t / 10, a[1] + (b[1] - a[1]) * t / 10, islands) for t in range(11))
+
+    # Start the walk at a blocked angle, so a run never wraps round the join.
+    start = next((i for i, p in enumerate(points) if p is None), 0)
+    runs, run = [], []
+    for k in range(60):
+        p = points[(start + k) % 60]
+        if p is None or (run and not clear_between(run[-1], p)):
+            if len(run) > 3:
+                runs.append(run)
+            run = [p] if p else []
+        else:
+            run.append(p)
+    if len(run) > 3:
+        runs.append(run)
+    # The two longest stretches of water get a boat each.
+    return sorted(runs, key=len, reverse=True)[:2]
+
+
 def layout():
     school = Layout("hogwarts", size=SIZE, spawn=(-6, -100), base="lake")
     rng = random.Random(31)
@@ -61,15 +111,11 @@ def layout():
         school.building("stands", x, y, rot)
 
     # --- boats on the lake ---
-    # Round the east and west of the lake and back: a full loop would cross the strip of land
-    # from the shore to the island.
-    def arc(start, end, steps=7):
-        return [(96 * math.cos(math.radians(a)), 10 + 96 * math.sin(math.radians(a))) for a in (start + (end - start) * i / steps for i in range(steps + 1))]
-    east = arc(-62, 85)
-    west = arc(95, 238)
-    mover(school, "canoe", east + east[-2:0:-1], speed=4, yaw=90, scale=2, seed=1)
-    mover(school, "canoe", west + west[-2:0:-1], speed=4, yaw=90, scale=2, seed=2)
-    mover(school, "canoe", [(40, -84), (70, -60)], speed=3, yaw=90, scale=1.8, seed=3)
+    # Boats keep to open water: each route is worked out from the island outlines, hugging the shore
+    # but never closer than BOAT_CLEARANCE to it, and turning back before the strip of land to the shore.
+    for route in lake_routes(school.data["islands"]):
+        mover(school, "canoe", route + route[-2:0:-1], speed=4, yaw=90, scale=2, seed=len(route))
+
 
     # --- the forest on the east of the island, rocks along the shore ---
     taken = [(e["pos"][0], e["pos"][1], 13) for e in school.data["buildings"]]
