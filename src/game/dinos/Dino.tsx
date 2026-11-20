@@ -7,7 +7,7 @@ import * as THREE from 'three';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { audio } from '../../audio/engine';
 import type { DinoId } from '../../types';
-import { getState, useStore } from '../../ui/store';
+import { actions, getState, useStore } from '../../ui/store';
 import { fx } from '../../world/effects/Effects';
 import { toonGradient } from '../../world/toon';
 import { game, input } from '../state';
@@ -148,6 +148,7 @@ export function Dino({ spawn }: { spawn: THREE.Vector3 }) {
           }
           if (hit && !move.struck) {
             move.struck = true;
+            if (move.power > 1.1) actions.award('power');
             audio.dino('crunch');
             fx.shake(0.35);
             game.hitStop(50);
@@ -202,6 +203,7 @@ export function Dino({ spawn }: { spawn: THREE.Vector3 }) {
             audio.dino('whistle', 0.5);
           }
         }
+        if (move.power > 1.1 && hit) actions.award('power');
         if (move.power > 1.1) {
           // A fully wound-up move: a bigger burst, so he can see it was worth the wait.
           fx.ring(_point.set(position.x, 0, position.z), stats.moveRadius * 1.6);

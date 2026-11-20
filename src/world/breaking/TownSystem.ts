@@ -8,8 +8,8 @@ type Rapier = typeof import('@dimforge/rapier3d-compat').default;
 const MAX_MOVING = 150;
 /** Settled debris sinks into the ground after this long. */
 const SETTLE_SECONDS = 4;
-const SINK_SPEED = 1.5;
-const SINK_SECONDS = 4;
+const SINK_SPEED = 0.5;
+const SINK_SECONDS = 1.2;
 /** Collapse spreads upwards one storey at a time. */
 const STOREY_DELAY = 0.06;
 /** Below this share of ground-floor walls, everything left comes down. */
@@ -60,12 +60,16 @@ export interface ModuleState {
   hp: number;
   tipLocal: THREE.Matrix4 | null;
   floatAt: THREE.Vector3 | null;
+  /** The module's own bounding box, before it is placed in the world. */
+  shape: THREE.Box3;
+  /** For a vehicle: where the module sits relative to the vehicle. */
+  carried: THREE.Matrix4 | null;
 }
 
-export type BuildingKind = 'building' | 'prop' | 'crate' | 'domino' | 'ball' | 'block' | 'giantTower';
+export type BuildingKind = 'building' | 'prop' | 'crate' | 'domino' | 'ball' | 'block' | 'giantTower' | 'mover';
 
 export interface BuildingState {
-  meta: BuildingMeta & { kind: BuildingKind; order?: number; run?: number };
+  meta: BuildingMeta & { kind: BuildingKind; order?: number; run?: number; secret?: number; route?: number[]; speed?: number; yaw?: number };
   kind: BuildingKind;
   modules: ModuleState[];
   box: THREE.Box3; // world bounds
@@ -80,6 +84,8 @@ export interface BuildingState {
   fine: RigidBody | null; // one box per module after it
   roughShape: { position: THREE.Vector3; quaternion: THREE.Quaternion; centre: THREE.Vector3; half: THREE.Vector3 };
   tipping: { body: RigidBody; time: number } | null;
+  /** For a vehicle that drives along a route: where it is on it. */
+  drive: { route: THREE.Vector3[]; length: number; at: number; speed: number; yaw: number } | null;
 }
 
 export interface HitOptions {
@@ -102,6 +108,10 @@ export interface TownEvents {
   onTowerTip?(building: BuildingState): void;
   onTowerCrash?(building: BuildingState): void;
   onRebuilt?(building: BuildingState): void;
+  /** A move struck here (whether or not it hit anything). */
+  onHit?(centre: THREE.Vector3, radius: number, push: number): void;
+  /** A settled piece starts to sink away. */
+  onSink?(module: ModuleState): void;
 }
 
 const _matrix = new THREE.Matrix4();
@@ -112,7 +122,7 @@ const _v = new THREE.Vector3();
 const _w = new THREE.Vector3();
 const _q = new THREE.Quaternion();
 
-const isStreetProp = (kind: BuildingKind) => kind === 'prop' || kind === 'crate';
+const isStreetProp = (kind: BuildingKind) => kind === 'prop' || kind === 'crate' || kind === 'mover';
 const isLoose = (kind: BuildingKind) => kind === 'domino' || kind === 'ball' || kind === 'block';
 
 /**
@@ -196,6 +206,7 @@ export class TownSystem {
           fine: null,
           roughShape: { position, quaternion, centre: new THREE.Vector3(), half: new THREE.Vector3() },
           tipping: null,
+          drive: null,
         };
         buildings.set(parent, building);
         this.buildings.push(building);
@@ -238,6 +249,8 @@ export class TownSystem {
         hp: 1,
         tipLocal: null,
         floatAt: null,
+        shape: geometry.boundingBox!.clone(),
+        carried: null,
       };
       building.modules.push(module);
       building.remaining++;
@@ -267,6 +280,7 @@ export class TownSystem {
       local.getCenter(building.roughShape.centre);
       local.getSize(building.roughShape.half).multiplyScalar(0.5);
       this.stand(building);
+      if (building.kind === 'mover') this.startDriving(building);
     }
 
     this.dominoes.sort((a, b) => (a.building.meta.order ?? 0) - (b.building.meta.order ?? 0));
@@ -313,6 +327,7 @@ export class TownSystem {
   hit(centre: THREE.Vector3, radius: number, options: HitOptions): boolean {
     const { push, lift = 0.8, move = -1, direction } = options;
     this.aim = direction ?? null;
+    this.events.onHit?.(centre, radius, push);
     let any = false;
 
     // Things that are already loose get knocked about too (before this hit adds more).
@@ -407,6 +422,12 @@ export class TownSystem {
     this.rebuilds = order.map((building, index) => ({ building, at: this.time + 0.2 + index * 0.07 }));
   }
 
+  /** Put one building back up at once, with the springy pop (the wind-up robot does this). */
+  rebuildOne(building: BuildingState) {
+    this.rebuilds = this.rebuilds.filter((entry) => entry.building !== building);
+    this.restore(building);
+  }
+
   get rebuilding() {
     return this.rebuilds.length > 0;
   }
@@ -423,6 +444,8 @@ export class TownSystem {
       this.detach(entry.module);
       this.checkFullCollapse(entry.module.building);
     }
+
+    for (const building of this.buildings) if (building.drive && building.remaining > 0) this.driveOn(building, dt);
 
     // Walking into street furniture knocks it over without slowing the dino down.
     const { position: dino, radius } = this.dino;
@@ -509,7 +532,9 @@ export class TownSystem {
       }
     }
     for (const module of this.sinking) {
-      _matrix.compose(module.position, module.quaternion, _one);
+      // It shrinks away as it settles into the ground, rather than visibly sliding through it.
+      const left = Math.max(1 - module.sunk / SINK_SECONDS, 0.001);
+      _matrix.compose(module.position, module.quaternion, _scale.setScalar(left * left));
       this.mesh.setMatrixAt(module.instanceId, _matrix);
     }
     for (const building of this.buildings) {
@@ -753,6 +778,68 @@ export class TownSystem {
     module.state = 'sinking';
     module.sunk = 0;
     this.sinking.push(module);
+    this.events.onSink?.(module);
+  }
+
+  // --- vehicles ----------------------------------------------------------------
+
+  private startDriving(building: BuildingState) {
+    const flat = building.meta.route ?? [];
+    // The layout's (x, y) is the game's (x, -z).
+    const route: THREE.Vector3[] = [];
+    for (let i = 0; i + 1 < flat.length; i += 2) route.push(new THREE.Vector3(flat[i], 0, -flat[i + 1]));
+    if (route.length < 2) return;
+    let length = 0;
+    for (let i = 0; i < route.length; i++) length += route[i].distanceTo(route[(i + 1) % route.length]);
+    const inverse = new THREE.Matrix4().compose(building.roughShape.position, building.roughShape.quaternion, _one).invert();
+    for (const module of building.modules) {
+      module.carried = new THREE.Matrix4().multiplyMatrices(inverse, _matrix.compose(module.rest.position, module.rest.quaternion, _one));
+    }
+    building.drive = { route, length, at: 0, speed: building.meta.speed ?? 6, yaw: THREE.MathUtils.degToRad(building.meta.yaw ?? 0) };
+  }
+
+  /** Move a vehicle along its route, carrying its pieces, and bump aside any street furniture in its way. */
+  private driveOn(building: BuildingState, dt: number) {
+    const drive = building.drive!;
+    drive.at = (drive.at + drive.speed * dt) % drive.length;
+    let left = drive.at;
+    const { route } = drive;
+    let from = route[0];
+    let to = route[1];
+    for (let i = 0; i < route.length; i++) {
+      from = route[i];
+      to = route[(i + 1) % route.length];
+      const leg = from.distanceTo(to);
+      if (left <= leg || i === route.length - 1) {
+        _v.copy(from).lerp(to, leg > 0 ? Math.min(left / leg, 1) : 0);
+        break;
+      }
+      left -= leg;
+    }
+    const heading = Math.atan2(to.x - from.x, to.z - from.z) + drive.yaw;
+    // Turn smoothly rather than snapping round the corners.
+    const current = building.roughShape.quaternion;
+    _q.setFromAxisAngle(_w.set(0, 1, 0), heading);
+    current.slerp(_q, 1 - Math.exp(-dt * 5));
+    building.roughShape.position.copy(_v);
+    _body.compose(_v, current, _one);
+
+    building.box.makeEmpty();
+    for (const module of building.modules) {
+      if (module.state !== 'intact') continue;
+      _matrix.multiplyMatrices(_body, module.carried!);
+      _matrix.decompose(module.rest.position, module.rest.quaternion, _scale);
+      module.box.copy(module.shape).applyMatrix4(_matrix);
+      building.box.union(module.box);
+      this.mesh.setMatrixAt(module.instanceId, _matrix);
+    }
+    building.box.getCenter(building.centre);
+
+    for (const other of this.buildings) {
+      if (other === building || other.remaining === 0 || (other.kind !== 'prop' && other.kind !== 'crate')) continue;
+      if (!other.box.intersectsBox(building.box)) continue;
+      for (const module of other.modules) this.detach(module, building.centre, 4, 0.6);
+    }
   }
 
   // --- the giant tower ------------------------------------------------------

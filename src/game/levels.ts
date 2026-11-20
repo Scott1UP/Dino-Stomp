@@ -1,6 +1,6 @@
 import type { DinoId } from '../types';
 
-export type LevelId = 'block-town' | 'playground-park' | 'castle-hill' | 'farm' | 'forest';
+export type LevelId = 'block-town' | 'playground-park' | 'castle-hill' | 'farm' | 'forest' | 'robot-castle';
 export type Mode = 'story' | 'sandbox';
 
 export interface ObjectiveDef {
@@ -25,6 +25,8 @@ export interface LevelDef {
   card: string;
   /** Which music theme plays. */
   theme: number;
+  /** The secret finale: it opens once every golden dino has been found. */
+  secret?: boolean;
   objectives: [ObjectiveDef, ObjectiveDef];
 }
 
@@ -90,7 +92,24 @@ export const LEVELS: LevelDef[] = [
       { id: 'giantTower', tag: 'giantTower', icon: '/ui/icon-giantTower.webp', required: 1 },
     ],
   },
+  {
+    // Castle Hill again, with a giant wind-up robot wandering about rebuilding it.
+    id: 'robot-castle',
+    name: 'Robot Castle',
+    model: '/models/castle-hill.glb',
+    ground: '/textures/castle-hill-ground.webp',
+    card: '/ui/level-robot-castle.webp',
+    theme: 2,
+    secret: true,
+    objectives: [
+      { id: 'robot', tag: 'robot', icon: '/ui/sticker-robot.webp', required: 5 },
+      { id: 'smash', tag: 'smash', icon: '/ui/icon-house.webp', required: 30 },
+    ],
+  },
 ];
+
+/** The levels with a golden dino hidden in them. */
+export const SECRET_LEVELS = LEVELS.filter((level) => !level.secret).map((level) => level.id);
 
 export const SANDBOX_THEME = 3;
 

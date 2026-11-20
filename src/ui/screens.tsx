@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   ArrowRight,
+  BookOpen,
   Blocks,
   Footprints,
   Gauge,
@@ -21,10 +22,11 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { audio } from '../audio/engine';
 import { sounds, speak, type Line } from '../audio/ui';
 import { DINOS, LEVELS, dinoDef, levelDef } from '../game/levels';
+import { STICKERS, stickerDef } from '../game/stickers';
 import type { DinoId } from '../types';
 import { Btn } from './Btn';
 import { Screen } from './Screen';
-import { actions, useStore, type Graphics } from './store';
+import { actions, allSecrets, useStore, type Graphics } from './store';
 
 const sticker = (id: DinoId) => `/ui/sticker-${id}.webp`;
 
@@ -44,6 +46,7 @@ function Back({ onPress }: { onPress: () => void }) {
 }
 
 export function Title() {
+  const stickers = useStore((s) => s.stickers);
   return (
     <Screen prompt="prompt-title" maxPrompts={3} className="screen title">
       <img className="logo" src="/ui/logo.webp" alt="Dino Stomp" draggable={false} />
@@ -57,9 +60,19 @@ export function Title() {
           Sandbox
         </Btn>
       </div>
-      <Btn label="Settings" onPress={actions.openParent} className="btn btn-square corner-settings">
-        <Settings />
-      </Btn>
+      <div className="row title-extras">
+        <Btn line="stickers-open" className="btn btn-plain" onPress={actions.openStickers}>
+          <BookOpen />
+          Stickers
+          <span className="count">
+            {Object.keys(stickers).length}/{STICKERS.length}
+          </span>
+        </Btn>
+        <Btn className="btn" onPress={actions.openParent}>
+          <Settings />
+          Settings
+        </Btn>
+      </div>
     </Screen>
   );
 }
@@ -128,10 +141,11 @@ export function LevelSelect() {
   const unlocked = useStore((s) => s.unlocked);
   const completed = useStore((s) => s.completed);
   const last = useStore((s) => s.level);
+  const opened = useStore((s) => allSecrets(s.secrets));
 
   // The one to pulse: the first level he hasn't finished, or the last one he played in sandbox.
   const next =
-    mode === 'sandbox' ? last : (LEVELS.find((l, i) => i < unlocked && !completed[l.id]) ?? LEVELS[unlocked - 1]).id;
+    mode === 'sandbox' ? last : (LEVELS.find((l, i) => !l.secret && i < unlocked && !completed[l.id]) ?? LEVELS[Math.min(unlocked, LEVELS.length) - 1]).id;
 
   return (
     <Screen prompt="prompt-level" className="overlay">
@@ -140,7 +154,8 @@ export function LevelSelect() {
         <h1 className="heading small">{mode === 'sandbox' ? 'Sandbox' : 'Where to?'}</h1>
         <div className="level-row">
           {LEVELS.map((level, index) => {
-            const locked = mode === 'story' && index >= unlocked;
+            if (level.secret && !opened) return null;
+            const locked = !level.secret && mode === 'story' && index >= unlocked;
             return (
               <Btn
                 key={level.id}
@@ -290,12 +305,13 @@ export function Pause() {
             Rebuild
           </Btn>
         )}
+        <Btn className="btn" onPress={actions.openParent}>
+          <Settings />
+          Settings
+        </Btn>
         <Btn className="btn" onPress={actions.home}>
           <Home />
           Home
-        </Btn>
-        <Btn label="Settings" onPress={actions.openParent} className="btn btn-square panel-corner">
-          <Settings />
         </Btn>
       </div>
     </Screen>
@@ -425,6 +441,62 @@ export function Parent() {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** The sticker book: everything he has earned, and grey shapes of what is still to find. */
+export function StickerBook() {
+  const earned = useStore((s) => s.stickers);
+  const [wiggle, setWiggle] = useState<string | null>(null);
+  return (
+    <Screen className="overlay">
+      <div className="panel book">
+        <Back onPress={actions.home} />
+        <h1 className="heading small">My stickers</h1>
+        <div className="sticker-grid">
+          {STICKERS.map((sticker, index) => {
+            const got = !!earned[sticker.id];
+            return (
+              <Btn
+                key={sticker.id}
+                line={(got ? `sticker-${sticker.id}` : `hint-${sticker.id}`) as Line}
+                className={`sticker-slot ${got ? 'got' : 'missing'} ${sticker.round ? 'round' : ''} ${wiggle === sticker.id ? 'wiggle' : ''}`}
+                style={{ animationDelay: `${index * 35}ms` }}
+                onPress={() => {
+                  setWiggle(null);
+                  window.requestAnimationFrame(() => setWiggle(sticker.id));
+                }}
+              >
+                <img src={sticker.art} alt="" draggable={false} />
+              </Btn>
+            );
+          })}
+        </div>
+      </div>
+    </Screen>
+  );
+}
+
+/** A sticker just earned: it pops up big in the middle, then flies off to the book. */
+export function StickerToast() {
+  const id = useStore((s) => s.toast);
+  useEffect(() => {
+    if (!id) return;
+    const timer = window.setTimeout(() => {
+      sounds.pop();
+      speak('new-sticker');
+    }, 150);
+    return () => window.clearTimeout(timer);
+  }, [id]);
+  const sticker = id ? stickerDef(id) : null;
+  if (!sticker) return null;
+  return (
+    <div key={sticker.id} className="sticker-toast" aria-hidden="true">
+      <span className={`sticker-toast-art ${sticker.round ? 'round' : ''}`}>
+        <img src={sticker.art} alt="" draggable={false} />
+      </span>
+      <span className="sticker-toast-label">New sticker!</span>
     </div>
   );
 }

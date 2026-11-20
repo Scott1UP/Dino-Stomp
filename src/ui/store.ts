@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { DINOS, LEVELS, levelDef, type LevelId, type Mode } from '../game/levels';
+import { DINOS, LEVELS, SECRET_LEVELS, levelDef, type LevelId, type Mode } from '../game/levels';
 import { game, input } from '../game/state';
 import type { DinoId } from '../types';
 
@@ -10,7 +10,8 @@ export type Screen =
   | 'playing'
   | 'paused'
   | 'complete'
-  | 'parent';
+  | 'parent'
+  | 'stickers';
 
 export type Graphics = 'high' | 'medium' | 'low';
 
@@ -41,6 +42,12 @@ interface State {
   swapping: boolean;
   parentReturn: Screen;
   settings: Settings;
+  /** Stickers he has earned, by id. */
+  stickers: Record<string, boolean>;
+  /** Golden dinos found, by level. */
+  secrets: Partial<Record<LevelId, boolean>>;
+  /** The sticker just earned, shown big for a moment. */
+  toast: string | null;
 }
 
 const SAVE_KEY = 'dino-stomp-save';
@@ -72,6 +79,9 @@ let state: State = {
   swapping: false,
   parentReturn: 'title',
   settings: { volume: 0.8, music: true, shake: true, graphics: 'high', fps: false, ...saved.settings },
+  stickers: saved.stickers ?? {},
+  secrets: saved.secrets ?? {},
+  toast: null,
 };
 
 const listeners = new Set<() => void>();
@@ -90,8 +100,8 @@ function set(patch: Partial<State>) {
     input.stick.y = 0;
   }
   try {
-    const { dino, level, unlocked, completed, settings } = state;
-    localStorage.setItem(SAVE_KEY, JSON.stringify({ dino, level, unlocked, completed, settings }));
+    const { dino, level, unlocked, completed, settings, stickers, secrets } = state;
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ dino, level, unlocked, completed, settings, stickers, secrets }));
   } catch {
     // Private browsing: the game still works, it just won't remember.
   }
@@ -154,6 +164,7 @@ export const actions = {
         completed: { ...state.completed, [level]: true },
         unlocked: Math.max(state.unlocked, Math.min(index + 2, LEVELS.length)),
       });
+      actions.award(`level-${level}`);
       // A moment to watch the last thing fall before the party starts.
       setTimeout(() => {
         if (state.level === level && state.screen === 'playing') set({ screen: 'complete' });
@@ -191,6 +202,22 @@ export const actions = {
     else set({ screen: 'levelSelect' });
   },
 
+  /** Earn a sticker. The first time, it is shown big and announced. */
+  award(id: string) {
+    if (state.stickers[id]) return;
+    set({ stickers: { ...state.stickers, [id]: true }, toast: id });
+    window.setTimeout(() => {
+      if (state.toast === id) set({ toast: null });
+    }, 3200);
+  },
+  findSecret(level: LevelId) {
+    if (!state.secrets[level]) set({ secrets: { ...state.secrets, [level]: true } });
+    actions.award('secret');
+  },
+  openStickers() {
+    set({ screen: 'stickers' });
+  },
+
   openParent() {
     set({ parentReturn: state.screen, screen: 'parent' });
   },
@@ -207,6 +234,11 @@ export const actions = {
       progress: emptyProgress(),
       sessionKey: null,
       celebrated: false,
+      stickers: {},
+      secrets: {},
     });
   },
 };
+
+/** True once every golden dino has been found: the robot castle opens. */
+export const allSecrets = (secrets: Partial<Record<LevelId, boolean>>) => SECRET_LEVELS.every((id) => secrets[id]);

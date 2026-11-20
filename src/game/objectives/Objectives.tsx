@@ -8,7 +8,7 @@ import { actions, getState, useStore } from '../../ui/store';
 import type { BuildingState, ModuleState, TownSystem } from '../../world/breaking/TownSystem';
 import { fx } from '../../world/effects/Effects';
 import { levelDef } from '../levels';
-import { game } from '../state';
+import { events, game } from '../state';
 
 const AUTO_REBUILD_SHARE = 0.8;
 const MAX_ARROWS = 3;
@@ -88,7 +88,17 @@ export function Objectives({ town, pool }: { town: TownSystem; pool: [number, nu
       if (building.kind === 'building' || building.kind === 'giantTower') {
         fx.confetti(top, 26, building.colour, 12);
         count('smash');
+        actions.award('first-smash');
       }
+      events.down.forEach((listener) => listener(building));
+      // Stickers for the big moments.
+      const type = building.meta.type;
+      if (building.meta.objective === 'tower') actions.award('tower');
+      if (building.kind === 'giantTower') actions.award('giant-tower');
+      if (type === 'ferris_wheel') actions.award('big-wheel');
+      if (type === 'giant_sunflower') actions.award('sunflower');
+      if (type === 'treehouse') actions.award('treehouse');
+      if (building.kind === 'mover') actions.award('catch');
       if (building.meta.objective) {
         count(building.meta.objective);
         // A landmark down gets a cheer.
@@ -141,6 +151,7 @@ export function Objectives({ town, pool }: { town: TownSystem; pool: [number, nu
         const t = last.body.translation();
         audio.ui('bell');
         fx.confetti(_v.set(t.x, 8, t.z), 60, undefined, 16);
+        actions.award('dominoes');
         const index = levelDef(getState().level).objectives.findIndex((objective) => objective.tag === 'domino');
         if (index >= 0) actions.addProgress(index as 0 | 1);
       } else if (run.started && !moving) {
@@ -199,10 +210,12 @@ export function Objectives({ town, pool }: { town: TownSystem; pool: [number, nu
     const off: { distance: number; x: number; y: number }[] = [];
     if (playing) {
       for (const mark of marks.current) {
-        _v.set(mark.x, 4, mark.z).project(camera);
+        // The robot walks about, so his arrow follows him live.
+        const live = mark.key === 'robot' && game.robot ? game.robot : mark;
+        _v.set(live.x, 4, live.z).project(camera);
         if (_v.z > 1) _v.multiplyScalar(-1); // behind the camera: point the other way
         if (Math.abs(_v.x) < 0.9 && Math.abs(_v.y) < 0.86) continue; // on screen already
-        off.push({ distance: Math.hypot(mark.x - game.dino.position.x, mark.z - game.dino.position.z), x: _v.x, y: _v.y });
+        off.push({ distance: Math.hypot(live.x - game.dino.position.x, live.z - game.dino.position.z), x: _v.x, y: _v.y });
       }
       off.sort((a, b) => a.distance - b.distance);
     }
@@ -225,6 +238,7 @@ export function Objectives({ town, pool }: { town: TownSystem; pool: [number, nu
     if (!stars.current) return;
     const time = clock.elapsedTime;
     for (const star of stars.current.children) {
+      if (star.userData.robot && game.robot) star.position.set(game.robot.x, star.position.y, game.robot.z);
       star.position.y = (star.userData.height as number) + Math.abs(Math.sin(time * 2.6 + star.position.x)) * 1.8;
       star.rotation.y = time * 2;
     }
@@ -245,6 +259,7 @@ export function Objectives({ town, pool }: { town: TownSystem; pool: [number, nu
       if (building.down || !tag || !tags.has(tag) || building.kind === 'domino') continue;
       targets.push({ key: building.meta.id, x: building.centre.x, y: building.box.max.y + 3, z: building.centre.z });
     }
+    if (tags.has('robot') && game.robot) targets.push({ key: 'robot', x: game.robot.x, y: 17, z: game.robot.z });
     runs.forEach((run, index) => {
       if (run.started || !tags.has('domino')) return;
       const first = run.dominoes[0].rest.position;
@@ -265,7 +280,7 @@ export function Objectives({ town, pool }: { town: TownSystem; pool: [number, nu
   return (
     <group ref={stars}>
       {targets.map((target) => (
-        <mesh key={target.key} position={[target.x, target.y, target.z]} userData={{ height: target.y }} scale={[1.8, 2.4, 0.8]}>
+        <mesh key={target.key} position={[target.x, target.y, target.z]} userData={{ height: target.y, robot: target.key === 'robot' }} scale={[1.8, 2.4, 0.8]}>
           <octahedronGeometry args={[1, 0]} />
           <meshBasicMaterial color="#FFD84D" />
         </mesh>

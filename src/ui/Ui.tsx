@@ -1,7 +1,7 @@
 import { RotateCw } from 'lucide-react';
 import { SmashButton } from '../game/controls/SmashButton';
 import { Thumbstick } from '../game/controls/Thumbstick';
-import { Complete, DinoSelect, Hud, LevelSelect, Parent, Pause, Title } from './screens';
+import { Complete, DinoSelect, Hud, LevelSelect, Parent, Pause, StickerBook, StickerToast, Title } from './screens';
 import { useStore } from './store';
 import './ui.css';
 
@@ -26,6 +26,8 @@ export function Ui() {
       {screen === 'paused' && <Pause />}
       {screen === 'complete' && <Complete />}
       {screen === 'parent' && <Parent />}
+      {screen === 'stickers' && <StickerBook />}
+      <StickerToast />
 
       {/* Landscape only. Held upright, it asks for a turn. */}
       <div className="rotate-me">

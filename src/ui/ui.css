@@ -1117,3 +1117,138 @@
     gap: 10px;
   }
 }
+
+/* ───────── title extras: the sticker book and settings ───────── */
+.title-extras .btn {
+  min-height: 60px;
+  font-size: 24px;
+}
+.title-extras .count {
+  padding: 0 10px 2px;
+  border: calc(var(--stroke) * 0.6) solid var(--ink);
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 0.75em;
+  text-shadow: none;
+}
+
+/* ───────── the sticker book ───────── */
+.panel.book {
+  width: min(980px, 100%);
+  max-width: none;
+}
+.sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: clamp(8px, 1.6vw, 16px);
+  width: 100%;
+  overflow-y: auto;
+  padding: 6px;
+  touch-action: pan-y;
+}
+.sticker-grid * {
+  touch-action: pan-y;
+}
+.sticker-slot {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  padding: 8% !important;
+  border: calc(var(--stroke) * 0.8) dashed #d9b779 !important;
+  border-radius: 22px;
+  background: #fff3d4;
+  animation: card-in 0.4s var(--pop) both;
+}
+.sticker-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 0 rgb(40 20 5 / 0.25));
+}
+.sticker-slot.round img {
+  border: 5px solid #fff;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 calc(var(--stroke) * 0.8) var(--ink);
+}
+/* Not earned yet: a grey shape to wonder about. */
+.sticker-slot.missing img {
+  filter: brightness(0) opacity(0.14);
+}
+.sticker-slot.missing.round img {
+  box-shadow: none;
+  border-color: transparent;
+}
+.sticker-slot.got {
+  border-style: solid !important;
+  border-color: var(--ink) !important;
+  background: #fffaf0;
+}
+.sticker-slot.down {
+  transform: scale(0.94);
+}
+.sticker-slot.wiggle img {
+  animation: sticker-wiggle 0.5s var(--pop);
+}
+@keyframes sticker-wiggle {
+  30% { transform: scale(1.18) rotate(-8deg); }
+  60% { transform: scale(1.1) rotate(6deg); }
+}
+
+/* ───────── a new sticker pops up, then flies away ───────── */
+.sticker-toast {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+  animation: toast 3s var(--ease-out) both;
+}
+.sticker-toast-art {
+  display: block;
+  width: min(32vh, 220px);
+  height: min(32vh, 220px);
+}
+.sticker-toast-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 0 rgb(40 20 5 / 0.35));
+}
+.sticker-toast-art.round img {
+  border: 8px solid #fff;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 var(--stroke) var(--ink), 0 8px 0 rgb(40 20 5 / 0.35);
+}
+.sticker-toast-label {
+  font-size: clamp(26px, 6vh, 40px);
+  font-weight: 700;
+  color: var(--yellow);
+  -webkit-text-stroke: 7px var(--ink);
+  paint-order: stroke fill;
+  filter: drop-shadow(0 4px 0 rgb(40 20 5 / 0.85));
+}
+@keyframes toast {
+  0% { transform: translate(-50%, -50%) scale(0) rotate(-30deg); opacity: 0; }
+  14% { transform: translate(-50%, -50%) scale(1.15) rotate(6deg); opacity: 1; }
+  22% { transform: translate(-50%, -50%) scale(1) rotate(0); }
+  78% { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+  100% { transform: translate(-50%, -260%) scale(0.2) rotate(20deg); opacity: 0; }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .sticker-grid {
+    grid-template-columns: repeat(9, 1fr);
+  }
+  .title-extras .btn {
+    min-height: 46px;
+    font-size: 18px;
+  }
+}

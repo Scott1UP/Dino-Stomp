@@ -8,7 +8,9 @@ import { audio } from '../../audio/engine';
 import { Dino } from '../../game/dinos/Dino';
 import { levelDef } from '../../game/levels';
 import { Objectives } from '../../game/objectives/Objectives';
-import { game } from '../../game/state';
+import { events, game } from '../../game/state';
+import { Robot } from '../../game/objectives/Robot';
+import { Secrets } from '../../game/objectives/Secrets';
 import { getState, useStore } from '../../ui/store';
 import { GRAPHICS } from '../../game/graphics';
 import { TownSystem } from '../breaking/TownSystem';
@@ -92,6 +94,9 @@ export function Level() {
       if (speed > 9) fx.dust(_v.set(t.x, 0.5, t.z), 1.4);
     };
     system.maxMoving = GRAPHICS[getState().settings.graphics].maxMoving;
+    system.events.onHit = (centre, radius, push) => events.hit.forEach((listener) => listener(centre, radius, push));
+    // Settled debris shrinks away into the ground with a little puff of dust.
+    system.events.onSink = (module) => fx.dust(module.position, 1.4 + Math.min(module.half.length(), 3) * 0.4);
     game.town = system;
     game.bounds = info.size / 2 - 5;
     setTown(system);
@@ -141,6 +146,8 @@ export function Level() {
     <>
       {town && <primitive object={town.mesh} />}
       {town && <Objectives town={town} pool={info.pool} />}
+      {town && !level.secret && <Secrets town={town} />}
+      {town && level.id === 'robot-castle' && <Robot town={town} />}
       <Dino spawn={info.spawn} />
       <Effects />
 

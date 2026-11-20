@@ -14,12 +14,22 @@ export const game = {
   },
   /** Half the width of the playable area. The dino can't walk past it. */
   bounds: 96,
+  /** Where the wind-up robot is, in the Robot Castle (for the arrows). */
+  robot: null as THREE.Vector3 | null,
   /** How much confetti and dust to throw about, from the graphics setting (1 is all of it). */
   effects: 1,
   /** Screen shake, 0 to 1. It fades by itself. */
   shake: 0,
   /** Freeze the world for a few milliseconds on a big hit, so it feels heavy. Set by the app. */
   hitStop: (_ms: number) => {},
+};
+
+type Listener<T extends unknown[]> = Set<(...args: T) => void>;
+
+/** Things happening in the town that several systems listen for (secrets, the robot, stickers). */
+export const events = {
+  down: new Set() as Listener<[BuildingState]>,
+  hit: new Set() as Listener<[THREE.Vector3, number, number]>,
 };
 
 export type TapTarget =
