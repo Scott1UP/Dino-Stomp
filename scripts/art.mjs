@@ -57,6 +57,33 @@ export const ART = {
   'sticker-trex': dino('trex', 'a green Tyrannosaurus rex with a cream belly, mouth open in a happy roar showing white teeth.'),
   'sticker-triceratops': dino('triceratops', 'a purple Triceratops with a cream belly and three white horns.'),
   'sticker-stegosaurus': dino('stegosaurus', 'a teal Stegosaurus with golden-yellow plates along its back and tail spikes.'),
+  // --- the sticker book ---
+  ...Object.fromEntries(
+    [
+      ['first-smash', 'a cheerful little toy house tumbling apart: its roof popping off, a wall tipping and a window flying, with a puff of dust and stars. No studded or interlocking plastic bricks'],
+      ['tower', 'a tall toy clock tower toppling over sideways with a big swoosh line and stars'],
+      ['dominoes', 'a curving row of giant colourful dominoes falling one after another'],
+      ['big-wheel', 'a bright fairground big wheel tipping over with its little gondolas flying off'],
+      ['sunflower', 'a giant smiling sunflower bending over with petals flying'],
+      ['treehouse', 'a wooden treehouse in a leafy tree, its planks tumbling down'],
+      ['giant-tower', 'a tall grey toy castle tower with a pink cone roof crashing down, with fireworks'],
+      ['catch', 'a little red toy car bouncing up into the air, flipped over, with a big BOING burst'],
+      ['power', 'a huge glowing yellow starburst with lightning-bolt sparkles, like a super-powered smash'],
+      ['secret', 'a shiny golden toy dinosaur statue on a little pedestal, sparkling'],
+      ['robot', 'a friendly blue wind-up toy robot with a golden key in its back, toppled over on its back, dizzy, with stars'],
+    ].map(([id, what]) => [
+      `sticker-${id}`,
+      { size: SQUARE, transparent: true, tall: 360, out: `sticker-${id}`, prompt: `A round collectable reward sticker for a young child: ${what}. ${TOY} ${ORIGINAL} ${CUTOUT} ${MARGIN}` },
+    ]),
+  ),
+  'level-robot-castle': {
+    size: SQUARE, tall: 720, out: 'level-robot-castle',
+    prompt:
+      'A bright picture for a level card in a toy-town dinosaur game: a toy castle of grey blocks with pink and red cone-roofed ' +
+      'turrets on a green hill, and a giant friendly blue wind-up toy robot with a big golden key in its back striding through ' +
+      'the courtyard, seen from a high three-quarter angle like a toy playset. Sunny sky, soft colours. ' +
+      `${TOY} ${ORIGINAL} No text, no letters, no border.`,
+  },
   smash: {
     size: SQUARE, transparent: true, tall: 256, out: 'smash',
     prompt:
