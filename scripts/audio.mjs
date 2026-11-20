@@ -73,6 +73,7 @@ export const MUSIC = {
   'castle-hill': [`A playful, heroic toy-castle march at 116 BPM: toy trumpet fanfares, a recorder melody, timpani and a snare drum roll, grand but funny. ${BAND}`, 40],
   sandbox: [`A relaxed, happy play-time tune at 110 BPM: marimba, pizzicato strings, ukulele and soft toy percussion, gently bouncing along. ${BAND}`, 40],
   farm: [`A cheerful country hoedown tune at 120 BPM: a bouncy banjo, fiddle and harmonica melody over a tuba and woodblock, like a sunny toy farm. ${BAND}`, 40],
+  hogwarts: [`A whimsical, magical tune at 108 BPM: a twinkling celesta and glockenspiel melody with soft strings, a playful bassoon and light pizzicato, mysterious but friendly, like a toy wizard castle. ${BAND}`, 40],
   forest: [`A light, adventurous woodland tune at 112 BPM: a playful flute and clarinet melody over pizzicato strings, a marimba and soft woodblock, like a toy camping trip. ${BAND}`, 40],
 };
 
