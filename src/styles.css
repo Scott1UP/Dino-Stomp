@@ -1,0 +1,41 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #bfe3f2;
+  overscroll-behavior: none;
+}
+
+/* A stray pinch, double tap or long press must never zoom, select or open a menu. */
+.game {
+  position: fixed;
+  inset: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.game canvas {
+  display: block;
+  touch-action: none;
+}
+
+.debug-stats {
+  position: fixed;
+  bottom: 8px;
+  left: 50%;
+  z-index: 100;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgb(0 0 0 / 0.6);
+  color: #fff;
+  font: 13px/1.4 ui-monospace, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  white-space: nowrap;
+}
