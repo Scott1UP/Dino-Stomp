@@ -34,7 +34,7 @@ export const LEVELS: LevelDef[] = [
     id: 'block-town',
     name: 'Block Town',
     model: '/models/block-town.glb',
-    ground: '/textures/block-town-ground.png',
+    ground: '/textures/block-town-ground.webp',
     card: '/ui/level-block-town.webp',
     theme: 0,
     objectives: [
@@ -46,7 +46,7 @@ export const LEVELS: LevelDef[] = [
     id: 'playground-park',
     name: 'Playground Park',
     model: '/models/playground-park.glb',
-    ground: '/textures/playground-park-ground.png',
+    ground: '/textures/playground-park-ground.webp',
     card: '/ui/level-playground-park.webp',
     theme: 1,
     objectives: [
@@ -58,7 +58,7 @@ export const LEVELS: LevelDef[] = [
     id: 'farm',
     name: 'Sunny Farm',
     model: '/models/farm.glb',
-    ground: '/textures/farm-ground.png',
+    ground: '/textures/farm-ground.webp',
     card: '/ui/level-farm.webp',
     theme: 4,
     objectives: [
@@ -70,7 +70,7 @@ export const LEVELS: LevelDef[] = [
     id: 'forest',
     name: 'Pine Forest',
     model: '/models/forest.glb',
-    ground: '/textures/forest-ground.png',
+    ground: '/textures/forest-ground.webp',
     card: '/ui/level-forest.webp',
     theme: 5,
     objectives: [
@@ -82,7 +82,7 @@ export const LEVELS: LevelDef[] = [
     id: 'castle-hill',
     name: 'Castle Hill',
     model: '/models/castle-hill.glb',
-    ground: '/textures/castle-hill-ground.png',
+    ground: '/textures/castle-hill-ground.webp',
     card: '/ui/level-castle-hill.webp',
     theme: 2,
     objectives: [
