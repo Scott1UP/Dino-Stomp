@@ -1,0 +1,106 @@
+import type { DinoId } from '../types';
+
+export type LevelId = 'block-town' | 'playground-park' | 'castle-hill' | 'farm' | 'forest';
+export type Mode = 'story' | 'sandbox';
+
+export interface ObjectiveDef {
+  id: string;
+  /**
+   * What counts towards it. A building or prop carries this tag from the level
+   * layout; `smash` counts any building knocked over, and `domino` counts each
+   * domino run finished.
+   */
+  tag: string;
+  /** A rendered picture of the target, shown in the progress display. */
+  icon: string;
+  required: number;
+}
+
+export interface LevelDef {
+  id: LevelId;
+  /** Shown on the level card and spoken aloud. */
+  name: string;
+  model: string;
+  ground: string;
+  card: string;
+  /** Which music theme plays. */
+  theme: number;
+  objectives: [ObjectiveDef, ObjectiveDef];
+}
+
+/** Everything is about knocking things over: the big landmarks, and lots of everything else. */
+export const LEVELS: LevelDef[] = [
+  {
+    id: 'block-town',
+    name: 'Block Town',
+    model: '/models/block-town.glb',
+    ground: '/textures/block-town-ground.png',
+    card: '/ui/level-block-town.webp',
+    theme: 0,
+    objectives: [
+      { id: 'towers', tag: 'tower', icon: '/ui/icon-tower.webp', required: 5 },
+      { id: 'smash', tag: 'smash', icon: '/ui/icon-house.webp', required: 20 },
+    ],
+  },
+  {
+    id: 'playground-park',
+    name: 'Playground Park',
+    model: '/models/playground-park.glb',
+    ground: '/textures/playground-park-ground.png',
+    card: '/ui/level-playground-park.webp',
+    theme: 1,
+    objectives: [
+      { id: 'dominoes', tag: 'domino', icon: '/ui/icon-domino.webp', required: 4 },
+      { id: 'rides', tag: 'ride', icon: '/ui/icon-ride.webp', required: 6 },
+    ],
+  },
+  {
+    id: 'farm',
+    name: 'Sunny Farm',
+    model: '/models/farm.glb',
+    ground: '/textures/farm-ground.png',
+    card: '/ui/level-farm.webp',
+    theme: 4,
+    objectives: [
+      { id: 'barns', tag: 'barn', icon: '/ui/icon-barn.webp', required: 8 },
+      { id: 'giants', tag: 'giant', icon: '/ui/icon-giant.webp', required: 15 },
+    ],
+  },
+  {
+    id: 'forest',
+    name: 'Pine Forest',
+    model: '/models/forest.glb',
+    ground: '/textures/forest-ground.png',
+    card: '/ui/level-forest.webp',
+    theme: 5,
+    objectives: [
+      { id: 'lookouts', tag: 'lookout', icon: '/ui/icon-lookout.webp', required: 12 },
+      { id: 'smash', tag: 'smash', icon: '/ui/icon-house.webp', required: 25 },
+    ],
+  },
+  {
+    id: 'castle-hill',
+    name: 'Castle Hill',
+    model: '/models/castle-hill.glb',
+    ground: '/textures/castle-hill-ground.png',
+    card: '/ui/level-castle-hill.webp',
+    theme: 2,
+    objectives: [
+      { id: 'walls', tag: 'wall', icon: '/ui/icon-wall.webp', required: 14 },
+      { id: 'giantTower', tag: 'giantTower', icon: '/ui/icon-giantTower.webp', required: 1 },
+    ],
+  },
+];
+
+export const SANDBOX_THEME = 3;
+
+export const levelDef = (id: LevelId) => LEVELS.find((level) => level.id === id)!;
+
+export const DINOS: { id: DinoId; name: string; colour: string; dark: string; portrait: string }[] = [
+  { id: 'trex', name: 'T. rex', colour: '#3FA34D', dark: '#2A7436', portrait: '/ui/dino-trex.webp' },
+  { id: 'triceratops', name: 'Triceratops', colour: '#7B5CC9', dark: '#553C98', portrait: '/ui/dino-triceratops.webp' },
+  { id: 'stegosaurus', name: 'Stegosaurus', colour: '#1FA2A0', dark: '#13716F', portrait: '/ui/dino-stegosaurus.webp' },
+];
+
+export const dinoDef = (id: DinoId) => DINOS.find((d) => d.id === id) ?? DINOS[0];
+export const dinoColour = (id: DinoId) => dinoDef(id).colour;
